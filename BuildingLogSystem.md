@@ -2,12 +2,12 @@
 
 ## Policy
 
-**Why: Log nhằm mục đích gì**
-Who: System nào tạo ra log (API, APP, ...)
-When: Khi nào, thời điểm nào thì đưa ra log
-Where: Ở đâu (ở trong xử lí nào, API nào, ...)
-What: Log về cái gì
-How: Như thế nào ???
+- **Why: Log nhằm mục đích gì**
+- Who: System nào tạo ra log (API, APP, ...)
+- When: Khi nào, thời điểm nào thì đưa ra log
+- Where: Ở đâu (ở trong xử lí nào, API nào, ...)
+- What: Log về cái gì
+- How: Như thế nào ???
 
 ## Log level
 
