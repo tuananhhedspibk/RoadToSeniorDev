@@ -78,3 +78,35 @@ Việc lưu trữ dữ liệu trên nhiều máy được gọi là `sharding`. 
 ![Hash key](https://user-images.githubusercontent.com/15076665/185729943-d0efb502-b651-4c3f-9368-ef5a7314a80e.png)
 
 Với công thưc trên thì key sẽ luôn được lưu trữ ở một shard duy nhất.
+
+Tuy nhiên sẽ có một vấn đề xảy ra ở đây đó là khi ta thêm hoặc bớt một hoặc nhiều shards mới vào cluster. Khi đó ta cần phải `resharding`.
+
+Giả sử với key là `foo`, ban đầu nó được lưu ở `shard-0` thế nhưng sau khi thêm một shard mới vào cluster thì vị trí của nó phải là ở `shard-5`. Lúc này đòi hỏi quá trình di trú dữ liệu giữa các shard. Việc này sẽ tốn chi phí đồng thời sẽ ảnh hưởng đến tính sẵn có của hệ thống.
+
+Một giải pháp để giải quyết vấn đề trên đó là `Hashslot`. Lúc này dữ liệu sẽ được map với các hashslot.
+
+Có tất cả `16K hashslot`. Khi thêm shard mới thay vì "trực tiếp" di trú dữ liệu ta sẽ **di trú các hashslots** dọc theo các shards. Việc này đơn giản hơn so với di trú dữ liệu trực tiếp rất nhiều.
+
+Ví dụ:
+
+Ta có 2 shards: M1, M2 lần lượt chứa các slots (0 - 8191) và (8192 - 16383). Với key `foo` ta tiến hành "băm" và mod nó với số lượng các slots (16K), giả sử key được lưu ở shard M2. Ta thêm mới một shards M3.
+
+Lúc này hashslots sẽ được phân bổ lại như sau:
+
+M1: 0 - 5460
+M2: 5461 - 10922
+M3: 10923 - 16383
+
+khi đó sẽ có những keys ban đầu được lưu ở M1 nay sẽ chuyển qua M2, nhưng trên thực tế ta chỉ di chuyển các slots từ shard này sang shard kia mà thôi. Điều này sẽ giúp ta tránh được việc phải "băm lại" các keys để biết keys sẽ được lưu ở shard nào.
+
+### Gossiping
+
+Redis cluster sử dụng Gossiping để xác định cluster 's health. Như hình mình hoạ phía trên ta thấy rằng có 3 nodes M và 3 nodes S. Các nodes này sẽ tương tác với nhau liên tục để đảm bảo rằng các primary nodes luôn healthy. Khi có đủ số lượng nodes nhất định quyết định rằng sẽ thay thế một node nào đó (VD: M1) thì secondary node (VD: S1) sẽ được sử dụng để thay thế M1.
+
+Số lượng nodes tham gia vào việc quyết định trên hoàn toàn có thể được configure.
+
+Việc configure này nếu không được thực hiện chính xác sẽ dẫn đến tình trạng 2 "phe" `phản đối` và `đồng ý` cân bằng nhau về số lượng dẫn tới cluster rơi vào tình trạng bị "chia cắt".
+
+Hiện tượng trên được gọi là **split brain**
+
+Do đó nên một cluster thường có **số lẻ** các nodes, mỗi node sẽ có **2 replicas**
