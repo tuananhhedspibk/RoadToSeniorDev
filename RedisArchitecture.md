@@ -110,3 +110,52 @@ Việc configure này nếu không được thực hiện chính xác sẽ dẫn
 Hiện tượng trên được gọi là **split brain**
 
 Do đó nên một cluster thường có **số lẻ** các nodes, mỗi node sẽ có **2 replicas**
+
+### Redis Persistence Models
+
+Trong thực tế redis có thể được sử dụng cho nhiều mục đích lưu trữ khác nhau. Nếu bạn chỉ sử dụng redis như `cache` hoặc cho mục đích `real-time analytics` thì việc mất data bên trong redis cũng không phải vấn đề quá quan trọng.
+
+Tuy nhiên nếu muốn dữ liệu bên trong Redis không biến mất ta cần phải hiểu Redis lưu trữ dữ liệu của nó như thế nào.
+
+#### No Persistence
+
+Đây là trường hợp ta `disable Persistence`. Đây là cách nhanh nhất để chạy Redis tuy nhiên nó lại không đảm bảo lợi ích về lâu về dài.
+
+#### RDB files
+
+RDB (Redis Database): RDB persistence sẽ được thực thi tại những thời điểm nhất định (cách nhau những khoảng thời gian cố định), từ đó tạo ra các snapshots và lưu snapshots vào RDB.
+
+![File_000](https://user-images.githubusercontent.com/15076665/185786316-77e0dbb7-89c1-4871-b0ad-964f5d952a93.png)
+
+Cách làm này có những nhược điểm sau:
+
+1. Dữ liệu giữa các snapshots sẽ bị mất
+2. Nếu tiến hành chạy một tiến trình khác song song với tiến trình chạy redis hiện thời thì sẽ tốn tài nguyên, ảnh hưởng đến hiệu năng của main instance.
+
+#### AOF
+
+AOF (Append only Files): ở cách làm này ta sẽ log lại toàn bộ các write operation commands mà redis instance nhận được, các commands này sẽ được chạy lại khi instance được khởi động
+
+Cách làm này chặt chẽ hơn so với RDB ở chỗ không xảy ra tình trạng mất data giữa các snapshot như RDB, ở đây ta chỉ lưu lại log của các command chứ không thực thi nên dữ liệu chưa được lưu lại hoàn toàn.
+
+Khi instance được khởi động, các log commands này sẽ được thực thi.
+
+Nếu có thể ta cũng sẽ đưa các log commands này lưu trữu vào disk (do đó cách làm này tốn disk hơn RDB)
+
+![File_000 (2)](https://user-images.githubusercontent.com/15076665/185786802-d497105d-4aaf-43a5-97d5-9591db976597.png)
+
+Quá trình restore lại dữ liệu sẽ diễn ra như sau:
+
+![File_000 (1)](https://user-images.githubusercontent.com/15076665/185786805-1e0b2dfe-f745-4a20-9e54-a7c0c68d958f.png)
+
+#### Why not both ?
+
+Ta hoàn toàn có thể kết hợp `RDB` và `AOF`. Tuy nhiên để đảm bảo tính toàn vẹn của dữ liệu khi restart thì Redis sẽ sử dụng `AOF`.
+
+### Forking
+
+Giống như trong OS, Redis sẽ tạo ra một tiến trình con (fork) có ID cụ thể và tham chiếu tới tiến trình cha.
+
+Bản thân Redis cũng sử dụng rất nhiều bộ nhớ nhưng cơ chế forking của nó cho phép tiến trình con và cha `dùng chung bộ nhớ` nên sẽ tránh được tình trạng **out of memory**, tiến trình con này sẽ sử dụng bộ nhớ dùng chung để tiến hành `snapshotting` - kĩ thuật sử dụng bộ nhớ dùng chung để snapshotting này được gọi là `copy-on-write`.
+
+Nếu không có gì thay đổi thì không cần cấp phát thêm bộ nhớ mới. Ngược lại sẽ có bộ nhớ mới cấp phát, tiến trình con hoàn toàn không biết gì về việc này cả, qua đó giúp cho việc snapshot cả gigabyte dữ liệu diễn ra nhanh chóng.
