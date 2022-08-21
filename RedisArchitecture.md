@@ -1,6 +1,6 @@
 # Redis Architecture
 
-Tham khảo từ: https://architecturenotes.co/redis/
+Lược dịch lại từ: https://architecturenotes.co/redis/
 
 ## Redis là gì ?
 
