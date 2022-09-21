@@ -7,8 +7,9 @@ Dịch từ [nguồn](https://www.toptal.com/nodejs/node-js-error-handling)
 ## Types of Errors in Node.js
 
 Trong Node.js có 2 loại errors chính:
+
 - **Operational errors**: runtime error, một số ví dụ: "Out of memory", "An invalid input for an API endpoint"
-- **Programmer errors**: unexpected bugs, bản thân code có những vấn đề cần phải giải quyết. Ví dụ tiêu biểu: đọc property của "undefined" object. Các bug này thường do dev tạo nên chứ không liên quan đến operation. 
+- **Programmer errors**: unexpected bugs, bản thân code có những vấn đề cần phải giải quyết. Ví dụ tiêu biểu: đọc property của "undefined" object. Các bug này thường do dev tạo nên chứ không liên quan đến operation.
 
 ## Xử lí lỗi
 
@@ -76,6 +77,7 @@ if (!user) {
 ## Centralized Node.js Error-handling
 
 Việc xây dụng một component với chức năng để xử lí lỗi sẽ giúp giảm thiểu đi việc trùng lặp code xử lí lỗi trong project. Component này chịu trách nhiệm cho việc **giúp cho lỗi bắt được trở nên dễ hiểu hơn** ví dụ như:
+
 - Gửi thông báo đến system admin
 - Chuyển event error đến monitoring service như Sentry.io và log chúng ra
 
@@ -118,8 +120,9 @@ export class ErrorHandler {
 Để dev có thể theo dõi bug một cách dễ dàng hơn, hãy tiến hành log error ra theo một format dễ nhìn nhất.
 
 Một vài logger formatter tiêu biểu như:
-- https://github.com/expressjs/morgan
-- https://github.com/winstonjs/winston
+
+- <https://github.com/expressjs/morgan>
+- <https://github.com/winstonjs/winston>
 
 Hai thư viện này sẽ giúp cung cấp log ở các format level khác nhau tuỳ theo level của error.
 

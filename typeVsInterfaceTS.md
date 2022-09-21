@@ -62,6 +62,7 @@ type Member = {
 ## Các loại type có thể định nghĩa
 
 `interface` chỉ có thể định nghĩa kiểu cho:
+
 - Class
 - Object
 
