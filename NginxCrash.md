@@ -21,7 +21,7 @@ Có 2 khái niệm config cơ bản trong nginx đó là:
 - Context
 - Directive
 
-```nginx.conf
+```nginx
 http { # context, tương đương như scope
   index index.html;  # directive: giống như một config
 
@@ -60,7 +60,7 @@ Sự khác biệt cơ bản giữa `nginx restart` và `nginx reload` đó là:
 
 ## Nginx location block
 
-```nginx.conf
+```nginx
 location URI {
   # handle response
 }
@@ -74,7 +74,7 @@ Có 3 cách config cho URI:
 
 Với `Regex match` bạn có thể làm như ví dụ sau:
 
-```nginx.conf
+```nginx
 location ~ /count/[0-9] {
   root path;
 }
@@ -82,7 +82,7 @@ location ~ /count/[0-9] {
 
 `~` symbol cho thấy bạn sẽ sử dụng regex ở đây, tuy nhiên mặc định thì đây là `case sensitive` (phân biệt hoa thường), còn nếu thêm `*` symbol thì sẽ là `case insensitive` (không phân biệt hoa thường) như ví dụ sau:
 
-```nginx.conf
+```nginx
 location ~ /test[0-9] {
   return 200 "test";
 }
@@ -105,7 +105,7 @@ cũng sẽ match.
 
 Còn với `Exact match` bạn thêm dấu `=` phía trước URI như sau:
 
-```nginx.conf
+```nginx
 location = URI {
   # response
 }
@@ -113,7 +113,7 @@ location = URI {
 
 VD:
 
-```nginx.conf
+```nginx
 location = /test {
   return 200 "Hello test";
 }
@@ -126,7 +126,7 @@ Với response bạn có 3 cách viết như sau:
 
 **Cách 1 (sử dụng return):**
 
-```nginx.conf
+```nginx
 location /test {
   # return HTTP_STATUS_CODE "response content"
   return 200 "Response content";
@@ -143,7 +143,7 @@ còn với thiết lập `HTTP_STATUS_CODE = 404`, bạn sẽ thu được respo
 
 **Cách 2 (sử dụng root):**
 
-```nginx.conf
+```nginx
 location /test {
   root path;
 }
@@ -153,7 +153,7 @@ Với cách viết sử dụng `root` thì URI sẽ được tự động append
 
 VD:
 
-```nginx.conf
+```nginx
 location /test {
   root /var/www/home;
 }
@@ -165,7 +165,7 @@ Cách viết này sẽ "nói" cho nginx biết là hãy tìm đến file `index.
 
 Lúc này hãy sử dụng `try_files` như sau:
 
-```nginx.conf
+```nginx
 location /test {
   root /var/www/home;
   try_files test.html index.html =404;
@@ -176,7 +176,7 @@ Viết như trên có nghĩa là khi request đến `/test` hãy tìm đến fil
 
 **Cách 3 (sử dụng alias):**
 
-```nginx.conf
+```nginx
 location URI {
   alias path;
 }
@@ -184,7 +184,7 @@ location URI {
 
 Cách viết này sử dụng từ khoá `alias`, alias **KHÔNG TỰ append** URI vào path cho bạn như `root` thay vào đó bạn phải chỉ định path một cách tường minh
 
-```nginx.conf
+```nginx
 location /test {
   root /var/www/home;
 }
@@ -200,7 +200,7 @@ Với config như trên thì khi truy cập vào 2 URI là `/test` và `/bruh` t
 
 **Redirect:**
 
-```nginx.conf
+```nginx
 location URI1 {
   return 307 REDIRECT_URI;
 }
@@ -214,7 +214,7 @@ Trong trường hợp bạn không muốn bị redirect đến một trang khác
 
 VD:
 
-```nginx.conf
+```nginx
 rewrite ^/number/(\w+) /count/$1;
 ```
 
@@ -241,7 +241,7 @@ Chạy câu lệnh trên bạn có thể thấy được đường dẫn đến 
 
 ![Screen Shot 2022-09-22 at 17 40 57](https://user-images.githubusercontent.com/15076665/191700832-2397836a-1a19-4898-8ade-080418b0f78f.png)
 
-```nginx.conf
+```nginx
 location URI {
   access_log log_file_path;
 }
