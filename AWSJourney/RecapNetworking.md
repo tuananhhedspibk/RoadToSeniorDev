@@ -36,3 +36,4 @@ Nhưng `0.0.0.0` là địa chỉ mạng của các mạng, nó sẽ đại di�
 
 `127.0.0.0` là địa chỉ `loopback`
 
+### Lớp B
