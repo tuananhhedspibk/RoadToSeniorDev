@@ -1,6 +1,6 @@
 # Multiple load balancers
 
-Nguồn tham khảo: https://serverfault.com/questions/705194/is-it-possible-to-use-multiple-load-balancers-to-redirect-traffic-to-my-applicat
+Nguồn tham khảo: <https://serverfault.com/questions/705194/is-it-possible-to-use-multiple-load-balancers-to-redirect-traffic-to-my-applicat>
 
 ## Active/Passive Load balancers
 
