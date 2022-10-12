@@ -139,3 +139,72 @@ Chạy câu lệnh phía trên ở 2 terminals khác nhau chúng ta sẽ thấy 
 Còn ở terminal 2 thay vì "đi đến" server 1, request đã đi đến 2 servers còn lại là 2 và 3 để tránh server 1 "đang hoạt động"
 
 ![Screen Shot 2022-09-23 at 16 55 23](https://user-images.githubusercontent.com/15076665/191915921-fe660121-814d-4658-be86-6dbaf2d02e4e.png)
+
+## Inheritance & Directive
+
+### Inheritance
+
+```nginx.conf
+http {
+  server {
+    root /site/demo;
+
+    location {
+      # Inherit root
+      root /site/demo;
+    }
+  }
+}
+```
+
+### Directive
+
+Có 3 loại:
+
+- Standard
+- Arrray
+- Action
+
+```nginx.conf
+######################
+# (1) Array Directive
+######################
+# Can be specified multiple times without overriding a previous setting
+# Gets inherited by all child contexts
+# Child context can override inheritance by re-declaring directive
+access_log /var/log/nginx/access.log;
+access_log /var/log/nginx/custom.log.gz custom_format;
+
+#########################
+# (2) Standard Directive
+#########################
+# Can only be declared once. A second declaration overrides the first
+# Gets inherited by all child contexts
+# Child context can override inheritance by re-declaring directive
+root /sites/site2;
+
+    #######################
+    # (3) Action Directive
+    #######################
+    # Invokes an action such as a rewrite or redirect
+    # Inheritance does not apply as the request is either stopped (redirect/response) or re-evaluated (rewrite)
+    return 403 "You do not have permission to view this.";
+```
+
+## worker process
+
+```nginx.conf
+worker_processes 2;
+```
+
+Config trên sẽ tạo thêm một worker process (do mặc định luôn có `1 master process` và `1 woker process` chạy song song nhau)
+
+Về bản chất các `worker process` sẽ xử lí `asynchronous`. Mỗi một process sẽ chạy trên 1 CPU duy nhất.
+
+Các CPUs không thể share process cho nhau nên việc tăng số lượng processes lên cũng không giúp tăng khả năng xử lí của phần cứng lên được
+
+```nginx.conf
+worker_process auto;
+```
+
+nginx sẽ tự động tạo thêm các `worker process` để phân bổ lên các CPUs hiện có trong máy
