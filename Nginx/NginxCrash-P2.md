@@ -144,7 +144,7 @@ Còn ở terminal 2 thay vì "đi đến" server 1, request đã đi đến 2 se
 
 ### Inheritance
 
-```nginx.conf
+```nginx
 http {
   server {
     root /site/demo;
@@ -165,7 +165,7 @@ Có 3 loại:
 - Arrray
 - Action
 
-```nginx.conf
+```nginx
 ######################
 # (1) Array Directive
 ######################
@@ -193,7 +193,7 @@ root /sites/site2;
 
 ## worker process
 
-```nginx.conf
+```nginx
 worker_processes 2;
 ```
 
@@ -203,7 +203,7 @@ Về bản chất các `worker process` sẽ xử lí `asynchronous`. Mỗi mộ
 
 Các CPUs không thể share process cho nhau nên việc tăng số lượng processes lên cũng không giúp tăng khả năng xử lí của phần cứng lên được
 
-```nginx.conf
+```nginx
 worker_process auto;
 ```
 
