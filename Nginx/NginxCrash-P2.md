@@ -183,12 +183,12 @@ access_log /var/log/nginx/custom.log.gz custom_format;
 # Child context can override inheritance by re-declaring directive
 root /sites/site2;
 
-    #######################
-    # (3) Action Directive
-    #######################
-    # Invokes an action such as a rewrite or redirect
-    # Inheritance does not apply as the request is either stopped (redirect/response) or re-evaluated (rewrite)
-    return 403 "You do not have permission to view this.";
+#######################
+# (3) Action Directive
+#######################
+# Invokes an action such as a rewrite or redirect
+# Inheritance does not apply as the request is either stopped (redirect/response) or re-evaluated (rewrite)
+return 403 "You do not have permission to view this.";
 ```
 
 ## worker process
