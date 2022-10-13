@@ -208,3 +208,22 @@ worker_process auto;
 ```
 
 nginx sẽ tự động tạo thêm các `worker process` để phân bổ lên các CPUs hiện có trong máy
+
+## Header & Expire
+
+### Expire
+
+Sẽ chứa thông tin về việc browser sẽ cache dữ liệu cho đến khi nào
+
+```nginx
+add_header Cache-Control public;
+add_header Pragma public;
+add_header Vary Accept-Encoding;
+expires 60m;
+```
+
+`Cache-Control` sẽ nói cho client biết resource có thể được cache ở bất kì đâu
+
+`Pragma` là version cũ của `Cache-Control`
+
+`expire`: setup expire time
