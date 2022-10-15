@@ -19,7 +19,7 @@ sẽ khiến cho các thuộc tính của const trở thành `readonly`. Nếu t
 const x = "hello" as const; // Type "hello"
 ```
 
-`as const` còn được gọi là ** `constant assertion`. Khi sử dụng khai báo `as const` TS sẽ hiểu như sau:
+`as const` còn được gọi là `constant assertion`. Khi sử dụng khai báo `as const` TS sẽ hiểu như sau:
 
 - Sẽ không có sự mở rộng nào khác về kiểu (như đoạn code trên sẽ không có chuyện đi từ `"hello"` thành `string`)
 - Object literal sẽ trở thành `readonly`
@@ -90,7 +90,7 @@ interface Foo {
 }
 ```
 
-Đoạn code trên ý là: interface Foo phải có thuộc tính là `link` là `Links.Link1` hoặc `Links.link2`
+Đoạn code trên ý là: interface Foo phải có thuộc tính `link` là `Links.Link1` hoặc `Links.link2`
 
 ### Namespace với tên là Links
 
