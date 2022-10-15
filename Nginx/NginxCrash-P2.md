@@ -227,3 +227,18 @@ expires 60m;
 `Pragma` là version cũ của `Cache-Control`
 
 `expire`: setup expire time
+
+## HTTP2
+
+- HTTP2 là một `binary protocol`
+- HTTP2 cũng là `compressed headers` giúp giảm transfer time
+- HTTP2 sử dụng persistent connection
+- HTTP2 cũng là `Multiplex streaming`
+
+Sự khác biệt giữa HTTP/1.1 với HTTP2 nằm ở chỗ nếu ta muốn chuyển 3 files `html`, `css`, `js` thì HTTP/1.1 cần 3 connects cho lần lượt 3 files. Còn HTTP2 sẽ tổ hợp 3 files này lại, mã hoá nhị phân chúng và stream trên 1 connect duy nhất
+
+HTTP2 cũng có thể thực hiện `server push`
+
+> Quá trình mở 1 connect thường khá tốn thời gian, cũng như số lượng connect cùng 1 lúc giữa client và server là giới hạn
+
+HTTP/1.1 là `simplex streaming` tức một request sẽ phải tương ứng với 1 connect
