@@ -43,3 +43,21 @@ Dùng để set values cho multiple keys
 ## SETRANGE command
 
 `SETRANGE key idx str` - thay thế substring từ idx đến str.length của value tương ứng với key
+
+## Lợi ích của việc sử dụng các commands GETRANGE, SETRANGE, MSET, MGET
+
+![File_000](https://user-images.githubusercontent.com/15076665/196974640-046b99ea-6b03-41ab-8134-9735117c78c8.png)
+
+## Xử lí number
+
+Sử dụng GET, SET, MGET, MSET, ... tương tự như với string
+
+Với number ta còn có các lệnh như `INCR`, `DECR`, ... (các lệnh này lần lượt cộng, trừ giá trị đi 1).
+
+> Các câu lệnh cập nhật dữ liệu trong redis sẽ diễn ra gần như lập tức, nghĩa là quá trình lấy dữ liệu ra, cập nhật và lưu dữ liệu sẽ diễn ra gần như ngay lập tức
+
+## Ví dụ về vấn đề với việc cập nhật dữ liệu trong redis
+
+![File_000](https://user-images.githubusercontent.com/15076665/197317434-3f21ca2f-c805-4fa3-bdf0-0a018b7e208b.png)
+
+Lợi ích của việc sử dụng các commands như `INCR` hay `DECR` ở đây đó là việc redis sẽ thực thi các commands này lần lượt, tuần tự (1 command tại 1 thời điểm) từ đó giúp tránh được tình trạng dữ liệu không được cập nhật một cách chính xác do 2 commands cập nhật cùng 1 tài nguyên tại cùng 1 thời điểm (không toàn vẹn dữ liệu).
