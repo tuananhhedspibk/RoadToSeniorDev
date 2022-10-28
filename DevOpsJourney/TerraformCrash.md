@@ -98,3 +98,63 @@ Sử dụng như sau:
 ```tf
 subnet_info[0].cidr_block
 ```
+
+## Terraform locals
+
+Là cách định nghĩa các "biến" bằng cách gán chúng cho:
+
+- Một giá trị
+- Một biểu thức
+
+Việc làm này giúp ta có thể tận dụng các giá trị trong file config
+
+```tf
+locals {
+  name = "test"
+  enviroment = "prod"
+  full_name = "${local.name}-${local.enviroment}"
+}
+```
+
+## So sánh giữa locals vs variable
+
+```tf
+locals {
+  envname = var.is_prod ? "prod" : "dev"
+}
+
+variable "is_prod" {
+  type  = String
+  value = true
+}
+```
+
+Khác biệt:
+
+- local sẽ `không bị ghi đè từ bên ngoài` nhưng variable thì `có thể bị ghi đè từ bên ngoài`
+- Với local ta `có thể sử dụng toán tử ba ngôi` còn variable `thì không`
+- Bên ngoài muốn truy cập đến local thì phải thông qua `output`
+
+```tf
+# source module (./source.tf)
+output "main" {
+  value = local.envname
+}
+
+# Another file
+locals {
+  test = module.source.main
+}
+```
+
+## Terraform Module
+
+Là một container của các resources. Một module có thể **gọi đến** hoặc bị gọi bởi các modules khác
+
+```tf
+module "test" {
+  source = "./test"
+}
+```
+
+Trong quá trình định nghĩa module ta cần keyword `source` - đây sẽ là path đến thư mục định nghĩa module
