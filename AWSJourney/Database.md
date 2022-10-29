@@ -41,7 +41,7 @@ Sử dụng để cải thiện hiệu năng khi truy xuất dữ liệu, có th
 
 Hỗ trợ 2 engine:
 
-- redis
+- redis: hỗ trỡ multi AZ
 - memcached
 
 ## DynamoDB
@@ -126,3 +126,76 @@ Khi tiến hành nén, Redshift sẽ tự động chọn ra scheme tối ưu cho
 
 - Encrypt trong transit sử dụng SSL
 - Sử dụng giải thuật AES-256
+
+## Aurora
+
+AWS Relational Database
+
+Automated backup. Quá trình backup cũng như lấy snapshot không hề ảnh hưởng gì đến hiệu năng
+
+Khi tạo ra, sẽ có 1 `aurora cluster` với bên trong là:
+
+- 1 reader instance
+- 1 writer instance
+
+Nên trong 1 AZ sẽ có ít nhất 2 instances (2 bản sao lưu dữ liệu)
+
+Trong số MySQL, PostgreSQL, Aurora thì chỉ có Aurora replica mới có chức năng `failover`
+
+## Database Migration Service (DMS)
+
+Là công cụ migration, di trú dữ liệu từ:
+
+- RDB bên ngoài
+- NoSQL bên ngoài
+- Data warehouse bên ngoài
+
+vào các Database service của AWS
+
+![Screen Shot 2022-10-29 at 22 17 22](https://user-images.githubusercontent.com/15076665/198833656-6c466427-3ab7-4bb9-9355-f13d53a4b044.png)
+
+DMS hỗ trợ:
+
+- Migrate đồng nhất. VD: Oracle → AWS Oracle
+- Migrate không đồng nhất. VD: SQL Server → AWS Aurora
+
+Trong thực tế, migrate đồng nhất sẽ hoạt động như sau:
+
+![Screen Shot 2022-10-29 at 22 21 41](https://user-images.githubusercontent.com/15076665/198833848-8203920b-8672-44e5-9fdd-1e9029cf942f.png)
+
+Với migrate không đồng nhất thì ngoài DMS ta còn cần `Schema Conversion Tool - SCT`
+
+![Screen Shot 2022-10-29 at 22 34 44](https://user-images.githubusercontent.com/15076665/198834496-6ff98ffd-ad54-4d32-b376-ec2bb612c5eb.png)
+
+## Caching Strategies on AWS
+
+Những services dưới đây có khả năng hỗ trợ caching:
+
+- Cloudfront
+- API Gateway
+- ElastiCache: `Memcached` & `Redis`
+- DynamoDB Accelerator (DAX)
+
+Như hình phía dưới, ta có thể cache ở `cloudfront`, `API Gateway`, `ElastiCache` thậm chí cả DynamoDB (nếu ta sử dụng DAX).
+
+![Screen Shot 2022-10-29 at 22 41 13](https://user-images.githubusercontent.com/15076665/198834833-1bb84f53-a443-4cff-873c-6f681f2e3831.png)
+
+Và càng đi vào sâu trong hệ thống thì độ trễ sẽ tăng dần.
+
+Caching cần đảm bảo cân bằng giữa:
+
+- Up-to-date
+- accurate information
+- Latency
+
+## EMR
+
+Công cụ xử lí big-data. Trái tim của nó là cluster - container của các EC2 instances
+
+Mỗi instance được coi như là 1 node với role cụ thể.
+
+1 cluster sẽ có:
+
+- Master node: quản lí cluster - bắt buộc có
+- Core node: chạy task, lưu data vào `Handoop Distributed File System - HDFS`
+- Task node: chỉ chạy task, không lưu data vào `HDFS`
