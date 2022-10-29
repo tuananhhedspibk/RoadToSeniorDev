@@ -74,3 +74,21 @@ Scaling tự động dựa theo datetime
 
 Sử dụng kết hợp `EC2 auto scaling` + `AWS auto scaling`
 
+### Một vài scaling policies
+
+#### Target tracking policy
+
+Scale out Auto scaling group khi một metric cụ thể nào đó có sự thay đổi
+
+#### Simple scaling & Step scaling
+
+Chọn scaling metrics và threshold value cho Cloudwatch alarm để có thể tiến hành quá trình scaling
+
+#### Suspend & Resume scaling
+
+Dừng việc scaling tạm thời có thể do:
+
+- Thay đổi file configure
+- ...
+
+Và đồng thời có thể tiếp tục quá trình scaling lại.
