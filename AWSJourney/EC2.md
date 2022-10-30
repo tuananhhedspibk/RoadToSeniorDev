@@ -1,5 +1,11 @@
 # Quickly recap about EC2
 
+## EC2 instances type
+
+- `On-demand`: default mode, khi request instance nếu còn capacity thì sẽ cấp phát instance, instance là của chúng ta một khi được tạo
+- `Reserved`: AWS sẽ phục vụ cho chúng ta
+- `Spot`: chúng ta yêu cầu instance, cung cấp maximum price và nếu còn free capacity và price của chúng ta >= price hiện tại thì ta sẽ có instance
+
 ## Security group
 
 Security group là `stateful` nên do đó ta không cần quan tâm nhiều đến việc mapping giữa `inbound` và `outbound` (do mọi outbound tương ứng với inbound sẽ được tạo tự động).
