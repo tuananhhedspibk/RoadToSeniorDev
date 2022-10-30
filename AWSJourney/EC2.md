@@ -122,3 +122,35 @@ Tăng cườngg sự giám sát với user và resource activity thông qua vi�
 Từ đó ta có thể biết được user nào, account nào, IP nào thực hiện AWS calling hay API calling
 
 > Cloudwatch monitoring performance, Cloudtrail monitor API calls in AWS platform
+
+## Storage
+
+### EBS (Elastic Block Store)
+
+Network drive gắn với instance, cho phép lưu trữ dữ liệu lâu dài kể cả khi instance bị tắt (terminated).
+
+Chỉ có thể mount với 1 instance duy nhất (CCP level).
+
+EBS chỉ thuộc về 1 AZ duy nhất.
+
+EBS cũng có thể được attached vào hoặc dettached khỏi 1 instance
+
+> Pricing for provision capacity (GBs, IOPS)
+
+Mặc định thì `root EBS volume` sẽ bị xoá khi EC2 instance tắt (Delete on termination) các `EBS volume` khác sẽ không bị xoá khi EC2 instance tắt.
+
+### EBS snapshot
+
+Là bản backup của EBS tại một thời điểm nhất định. Snapshot có thể được copy trên nhiều AZs hoặc regions.
+
+> Không nhất thiết phải dettach volume khi lấy snapshot nhưng nên làm như vậy
+
+![Screen Shot 2022-10-31 at 8 26 29](https://user-images.githubusercontent.com/15076665/198907077-e275a903-7f3c-4822-a30b-d83f20729f5c.png)
+
+Một vài features:
+
+- Snapshot Archive:
+  - Chuyển sang `archive tier` sẽ rẻ hơn `75%`
+  - Cần 24 - 72 giờ để restoring archive
+- Recycling: ta có thể setup rules để recover lại snapshot khi bị `accident deleted`, có thể chỉ định `retention` từ 1 ngày - 1 năm
+- Fasst snapshot restore (FSR): force full initialization để không còn latency khi sử dụng lại lần đầu (khá tốn $)
