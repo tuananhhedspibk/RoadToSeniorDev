@@ -92,3 +92,27 @@ Dừng việc scaling tạm thời có thể do:
 - ...
 
 Và đồng thời có thể tiếp tục quá trình scaling lại.
+
+## Cloudwatch
+
+Host level metrics:
+
+- CPU
+- Network
+- Disk
+- Status check
+
+Standard monitoring: 5 phút
+
+Detail monitoring: 1 phút
+
+## Cloudtrail
+
+Tăng cườngg sự giám sát với user và resource activity thông qua việc recording:
+
+- AWS Management Console actions
+- API calls
+
+Từ đó ta có thể biết được user nào, account nào, IP nào thực hiện AWS calling hay API calling
+
+> Cloudwatch monitoring performance, Cloudtrail monitor API calls in AWS platform
