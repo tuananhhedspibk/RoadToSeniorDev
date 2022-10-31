@@ -53,3 +53,22 @@ Health check sẽ được thực hiện ở `target group level`
 Application server sẽ không nhìn thấy trực tiếp `IP address` của client mà thay vào đó sẽ phải xem qua `X-Forwarded-For`
 
 Chúng ta cũng có thể lấy về port và protocol thông qua lần lượt `X-Forwarded-Port` & `X-Forwarded-Proto`
+
+## Network Load Balancer
+
+Nằm ở layer 4. Cho phép:
+
+- Forward TCP, UDP traffic tới instances
+- Xử lí cả triệu req trên giây
+- Less latency ~ 100ms
+
+NLB có một static IP trên mỗi AZ, hỗ trợ assign Elastic IP
+
+Target groups:
+
+- EC2 instances
+- IP addresses (Private IPs)
+- ALB
+- Health check support TCP, HTTP, HTTPS
+
+![Screen Shot 2022-11-01 at 8 27 05](https://user-images.githubusercontent.com/15076665/199128314-1b8d4e68-264e-4f46-b9e2-325fcea706a5.png)
