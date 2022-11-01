@@ -47,10 +47,10 @@ VD: `ｍ.google.com/` sẽ dùng cho địa chỉ của web trên mobile, đồn
 
 Cũng dùng để map một DNS name tới một "target" DNS name khác (có thể là ELB, Cloudfront, S3 buckets)
 
-Tuy nhiêm nếu `CName` không thể dùng cho `naked domain names` (VD: google.com) thì
+Tuy nhiên nếu `CName` không thể dùng cho `naked domain names` (VD: google.com) thì
 `Alias Record` và `A record` lại có thể sử dụng được.
 
-### TIL (Time to live)
+### TTL (Time to live)
 
 Thời gian mà DNS record sẽ được cached hoặc trên `Resolving server` hoặc `user own local PC`.
 
