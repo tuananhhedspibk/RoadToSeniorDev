@@ -154,3 +154,57 @@ Một vài features:
   - Cần 24 - 72 giờ để restoring archive
 - Recycling: ta có thể setup rules để recover lại snapshot khi bị `accident deleted`, có thể chỉ định `retention` từ 1 ngày - 1 năm
 - Fasst snapshot restore (FSR): force full initialization để không còn latency khi sử dụng lại lần đầu (khá tốn $)
+
+### EBS volume types
+
+Có 6 types:
+
+- gp2/gp3 (SSD): SSD volume phổ biến
+- io1/io2 (SSD): Highest-performance SSD (low-latency, high throughput)
+- st1 (HDD): Low cost HDD volume (frequently accessed)
+- sc1 (HDD): Lowest cost HDD volume (infrequently accessed)
+
+EBS volumes được đặc tả thông qua `Size` | `Throughtput` | `IOPS (I/O Per Second)`
+
+> Chỉ có gp2/gp3 và io1/io2 có thể sử dụng làm boot volume cho EC2 instance
+
+### EBS Multi-Attach - io1/io2 family
+
+Trong cùng một AZ, ta có thể attach 1 EBS volume cho nhiều EC2 instances
+
+![Screen Shot 2022-11-03 at 12 41 35](https://user-images.githubusercontent.com/15076665/199643616-9b88c8ae-217e-4587-8fc4-9d2cd297b979.png)
+
+Mỗi instance có full read/ write permission với EBS volume
+
+## EFS - Elastic File System
+
+Quản lí NFS (network file system) có thể được mount đến các instances thuộc nhiều AZs
+
+![Screen Shot 2022-11-03 at 12 49 38](https://user-images.githubusercontent.com/15076665/199644269-6c2d1db0-5bc9-4e30-a40d-f894ebfddfaf.png)
+
+Sử dụng `Security group` để quản lí access đến EFS.
+
+Usecases:
+
+- Content management
+- Web serving
+- Data sharing
+- Wordpress
+
+### Storage class
+
+**Storage Tiers:** dùng cho `frequenty access` files, `EFS-IA` (infrequently access): với các file không được truy cập trong 60 ngày (setup tuỳ theo `Lifecycle policy`) sẽ được di chuyển từ `EFS standard` sang `EFS-IA`
+
+![Screen Shot 2022-11-03 at 13 04 31](https://user-images.githubusercontent.com/15076665/199645557-a3b7be50-2a38-414e-96e7-1592929e9311.png)
+
+## EBS vs EFS
+
+**EBS** chỉ có thể attach đến một EC2 instance duy nhất trong 1 AZ mà thôi. EBS cũng sẽ `được locked` vào một AZ duy nhất.
+
+Ngoài ra ta có thể tạo snapshot cho EBS, sau đó sẽ tiến hành restore nó ở một AZ khác (migrate EBS)
+
+![Screen Shot 2022-11-03 at 13 14 34](https://user-images.githubusercontent.com/15076665/199646466-b0faaa43-5736-4559-a957-80614ca24ec8.png)
+
+**EFS** cho phép chia sẻ trên nhiều AZs, chỉ dùng cho Linux instance (POSIX)
+
+![Screen Shot 2022-11-03 at 13 26 40](https://user-images.githubusercontent.com/15076665/199647605-23d2541c-aa88-4924-9617-493af7fef688.png)
