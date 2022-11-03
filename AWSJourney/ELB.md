@@ -72,3 +72,47 @@ Target groups:
 - Health check support TCP, HTTP, HTTPS
 
 ![Screen Shot 2022-11-01 at 8 27 05](https://user-images.githubusercontent.com/15076665/199128314-1b8d4e68-264e-4f46-b9e2-325fcea706a5.png)
+
+## SSL/TLS
+
+Cho phép mã hoá traffic giữa client & LB (in-flight encryption)
+
+SSL = Secure Socket Layer
+TLS = Transport Layer security (new version of SSL)
+
+Các certificate này sẽ được quản lí thông qua ACM
+
+![Screen Shot 2022-11-03 at 11 30 52](https://user-images.githubusercontent.com/15076665/199638365-e3e0ed1e-1295-41d9-bed2-b47cf8b420df.png)
+
+### SNI - Server name indication
+
+SNI giải quyết vấn đề sử dụng nhiều SSL certificates trên một web server
+
+Đây là một `protocol mới`, yêu cầu client phải chỉ rõ hostname trong quá trình SSL handshake
+
+Server sau đó sẽ tìm certificate phù hợp hoặc trả về default certificate
+
+![Screen Shot 2022-11-03 at 11 43 58](https://user-images.githubusercontent.com/15076665/199638353-5b6ec3ac-981c-4ce2-8ded-7279f2cc7741.png)
+
+Tuy nhiên SNI chỉ hoạt động với ALB, NLB (newer generation), không hoạt động với CLB (old generation)
+
+### ELB - SSL Certificates
+
+- CLB chỉ hỗ trợ SSL certificate, tuy nhiên phải sử dụng nhiều CLBs cho nhiều hosts với nhiều certificates
+- ALB hỗ trợ multiple listeners với multiple SSL certificates, quản lí các certificates bằng SNI
+- NLB hỗ trợ multiple listeners với multiple SSL certificates, quản lí các certificates bằng SNI
+
+### Connection draining
+
+Feature naming:
+
+- Connection draining với CLB
+- Deregistration Delay với ALB, NLB
+
+Về bản chất nó là khoảng thời gian để một `de-registering` hoặc `unhealthy` instance có thể hoàn thiện các `in-flight requests`.
+
+Sau đó sẽ ngưng việc gửi request tới các `unhealthy` hoặc `de-registering` instances.
+
+![Screen Shot 2022-11-03 at 12 03 26](https://user-images.githubusercontent.com/15076665/199640177-ab111d55-ee75-4006-bd18-bc08f58fedb9.png)
+
+Khoảng thời gian này sẽ từ 1 ~ 3600s
