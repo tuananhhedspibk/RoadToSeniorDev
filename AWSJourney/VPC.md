@@ -90,3 +90,27 @@ Network ACL luôn đứng phía trước security group.
 Trong trường hợp muốn block IP, ta cần tiến hành ở `Network ACL`
 
 Network ACL là `stateless` nên các outbound traffic cần map với inbound traffic
+
+## Bastion host
+
+`NAT gateway` không cần phải đứng phía sau Security group như `NAT instance`.
+
+> Cả NAT gateway và NAT instance có chức năng cung cấp internet traffic cho EC2 instance trong private subnet
+
+Bastion như một cách để ta có thể truy cập vào EC2 instance trong private subnet thông qua SSH hoặc RDP
+
+Bastion sẽ được "làm cứng" để đảm bảo an toàn tối đa cho private instance phía sau nó
+
+> Không thể sử dụng NAT gateway làm Bastion host
+
+Minh hoạ về Bastion host:
+
+![Screen Shot 2022-11-03 at 22 34 26](https://user-images.githubusercontent.com/15076665/199734885-3f38b544-7e85-40ac-9929-43e9de054ac5.png)
+
+## Direct connect
+
+Tạo kết nối trực tiếp từ premise của người dùng tới AWS mà không thông qua Internet-based connection
+
+High throughput workloads
+
+![Screen Shot 2022-11-03 at 22 41 13](https://user-images.githubusercontent.com/15076665/199736356-2801100c-81b0-4da2-afff-6a2ce275f0a5.png)
