@@ -191,3 +191,12 @@ Sử dụng Private IP sẽ tiết kiệm chi phí hơn so với Public IP.
 ![Screen Shot 2022-11-19 at 16 16 37](https://user-images.githubusercontent.com/15076665/202839628-cbfc2d45-82ef-4c4d-8c18-8fb35c8d3c7f.png)
 
 Việc dồn mọi instance vào cùng một zone và sử dụng private IP address có thể sẽ giúp tiết kiệm chi phí (gần như free về traffic) nhưng sẽ dẫn đến nguy cơ SPOF.
+
+## Web Application Firewall (WAF)
+
+IP match condition cho phép chúng ta:
+
+- Allow
+- Deny
+
+request dựa theo IP address.

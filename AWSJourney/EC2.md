@@ -54,6 +54,11 @@ Auto scaling có 3 thành phần chính:
 - Configuration templates: launch template như là `key pair`, `security group`, `AMI ID`, ...
 - Scaling options: cung cấp các cách để scale auto scaling group. VD: scale dựa theo các điều kiện hoặc theo một schedule cho trước
 
+Default terminology policy:
+
+- Tắt các instance với oldest launch template hoặc launch configuration
+- Nếu các instances được launch với cùng template hoặc config thì instance có billing hour sắp tới gần nhất sẽ bị tắt
+
 ### Các scaling options
 
 ![Screen Shot 2022-10-11 at 23 10 35](https://user-images.githubusercontent.com/15076665/195114715-75da2e0d-9dd8-4120-81c6-fd8fd7a86450.png)
