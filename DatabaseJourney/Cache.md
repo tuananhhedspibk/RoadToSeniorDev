@@ -54,3 +54,5 @@ Ví dụ:
 ![LRU caching](https://user-images.githubusercontent.com/15076665/202895375-cf4d19e4-5359-45b1-8c8b-b431bfffc429.png)
 
 ### Triển khai thuật toán
+
+<https://github.com/tuananhhedspibk/BlogCode/blob/main/LRUCaching/index.ts>
