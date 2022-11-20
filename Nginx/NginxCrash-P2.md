@@ -242,3 +242,45 @@ HTTP2 cũng có thể thực hiện `server push`
 > Quá trình mở 1 connect thường khá tốn thời gian, cũng như số lượng connect cùng 1 lúc giữa client và server là giới hạn
 
 HTTP/1.1 là `simplex streaming` tức một request sẽ phải tương ứng với 1 connect
+
+## Nginx DNS resolver
+
+Với reverse proxy, ta có thể chỉ ra domain name của destination address như sau:
+
+```nginx
+location /path {
+  proxy_pass http://example.com;
+}
+```
+
+DNS name resolver chỉ được thực thi ở thời điểm nginx khởi động. TTL ko được chú ý, nên nginx sẽ luôn luôn sử dụng một IP address duy nhất
+
+Do đó nên IP address tương ứng với host bị thay đổi thì sẽ dẫn đến lỗi.
+
+> Mặc định thì nginx sẽ cache IP address dựa theo TTL response
+
+Việc sử dụng `resolver` trong nginx sẽ giúp ta có thể xử lí được domain name mà không cần phải reload nginx.
+
+```nginx
+location /path {
+  set $target example.com;
+  resolver 8.8.8.8;
+  proxy_pass http://$target/;
+}
+```
+
+`8.8.8.8` ở đây chính là `Google Public DNS`
+
+## HTTP-redirect vs Forwarding
+
+### Redirect
+
+Client sẽ được server báo lại là sẽ phải tự tìm đến resource ở một endpoint khác, khi đó client buộc phải biết đến endpoint và tự tìm đến nó.
+
+### Forwarding
+
+Server sẽ tìm resource "hộ" client và trả về cho phía client luôn, do đó lúc này client không nhất thiết phải quan tâm đến endpoint chứa resource nữa.
+
+Minh hoạ như hình bên dưới:
+
+![Redirect](https://user-images.githubusercontent.com/15076665/202892272-05402621-7769-45b8-95f8-1fcab99b18ae.png)
