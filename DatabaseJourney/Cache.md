@@ -34,4 +34,23 @@ Sử dụng 2 hàm `add` & `get`.
 
 ### Code implementation
 
-https://github.com/tuananhhedspibk/BlogCode/tree/main/LFUCaching
+<https://github.com/tuananhhedspibk/BlogCode/tree/main/LFUCaching>
+
+## Least Recently Used (LRU)
+
+### Nội dung chính
+
+Giải thuật này giữ cho các items thường xuyên được sử dụng luôn có mặt ở phần đầu của cache. Khi một item mới được truy cập thì nó sẽ được đẩy lên đầu. Khi cache chạm tới ngưỡng capacity các items ít được truy cập sẽ bị xoá khỏi cache tính từ phía cuối của cache
+
+### Hoạt động
+
+LRU cache cung cấp 2 method `put` & `get`
+
+- `put(key, value)`: set hoặc insert cặp `(key, value)`. Khi cache chạm tới ngưỡng capacity, item với tần suất truy cập ít nhất sẽ bị loại bỏ khỏi cache (sẽ là phần tử cuối cùng).
+- `get(key)`: lấy về value tương ứng với key, nếu key không tồn tại sẽ trả về -1, nếu key tồn tại thì sẽ đưa item tương ứng với key lên đầu cache.
+
+Ví dụ:
+
+![LRU caching](https://user-images.githubusercontent.com/15076665/202895375-cf4d19e4-5359-45b1-8c8b-b431bfffc429.png)
+
+### Triển khai thuật toán
