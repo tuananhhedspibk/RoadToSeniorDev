@@ -284,3 +284,19 @@ Server sẽ tìm resource "hộ" client và trả về cho phía client luôn, d
 Minh hoạ như hình bên dưới:
 
 ![Redirect](https://user-images.githubusercontent.com/15076665/202892272-05402621-7769-45b8-95f8-1fcab99b18ae.png)
+
+## Logging level
+
+Trong nginx có các log level như sau:
+
+- debug
+- warn
+- info
+- error
+- alert
+
+chúng được dùng làm tham số khi setup `error_log` hoặc `access_log` trong `nginx.conf` như sau:
+
+```nginx
+error_log /var/log/error.log debug;
+```
