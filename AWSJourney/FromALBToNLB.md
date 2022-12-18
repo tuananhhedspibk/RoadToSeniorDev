@@ -72,7 +72,7 @@ Bạn có thể xem hình minh hoạ dưới đây để biết thêm chi tiết
 
 Hiện tại hệ thống trên gặp phải một "vấn đề" đó là vào các khung giờ cao điểm, khi số lượng người truy cập gia tăng (ở cả ứng dụng mobile cũng như web) thì tôi "buộc" phải thực hiện hai việc sau:
 
-- Tiến hành "xin" AWS gia tăng dung lượng xử lí của ALB để nó có thể chịu được nhiều tải hơn vì nếu không tăng dung lượng xử lí thì sẽ dẫn đến tình trạng "bottleneck" và làm cho hệ thống bị chậm đi trông thấy.
+- Tiến hành "xin" AWS gia tăng access capacity của ALB để nó có thể chịu được nhiều tải hơn vì nếu không tăng dung lượng xử lí thì sẽ dẫn đến tình trạng "bottleneck" và làm cho hệ thống bị chậm đi trông thấy.
 - Tiến hành tăng cường thêm các EC2 instances để xử lí nhiều requests tới hệ thống hơn.
 
 Hiện thời thì việc tăng cường số lượng các EC2 instances là việc buộc phải làm, không thể thoái thác được. Nhưng việc "xin" AWS gia tăng dung lượng xử lí của ALB là việc có thể hạn chế (tôi muốn hạn chế là vì cần phải "nộp đơn" trước 2 ngày thì phía quản trị AWS mới đồng ý tăng dung lượng và đương nhiên là không ai thích chờ đợi cả).
