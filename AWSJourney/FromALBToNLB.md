@@ -72,16 +72,14 @@ Bạn có thể xem hình minh hoạ dưới đây để biết thêm chi tiết
 
 Hiện tại hệ thống trên gặp phải một "vấn đề" đó là vào các khung giờ cao điểm, khi số lượng người truy cập gia tăng (ở cả ứng dụng mobile cũng như web) thì tôi "buộc" phải thực hiện hai việc sau:
 
-- Tiến hành "xin" AWS gia tăng access capacity của ALB để nó có thể chịu được nhiều tải hơn vì nếu không tăng dung lượng xử lí thì sẽ dẫn đến tình trạng "bottleneck" và làm cho hệ thống bị chậm đi trông thấy.
+- Tiến hành "xin" AWS gia tăng access capacity của ALB để nó có thể chịu được nhiều tải hơn vì nếu không tăng access capacity thì sẽ dẫn đến tình trạng "bottleneck" và làm cho hệ thống bị chậm đi trông thấy.
 - Tiến hành tăng cường thêm các EC2 instances để xử lí nhiều requests tới hệ thống hơn.
 
-Hiện thời thì việc tăng cường số lượng các EC2 instances là việc buộc phải làm, không thể thoái thác được. Nhưng việc "xin" AWS gia tăng dung lượng xử lí của ALB là việc có thể hạn chế (tôi muốn hạn chế là vì cần phải "nộp đơn" trước 2 ngày thì phía quản trị AWS mới đồng ý tăng dung lượng và đương nhiên là không ai thích chờ đợi cả).
+Hiện thời thì việc tăng cường số lượng các EC2 instances là việc buộc phải làm, không thể thoái thác được. Nhưng việc "xin" AWS gia tăng access capacity của ALB là việc có thể hạn chế (tôi muốn hạn chế là vì cần phải "nộp đơn" trước 3 ngày thì phía quản trị AWS mới đồng ý tăng dung lượng và đương nhiên là không ai thích chờ đợi cả).
 
-Do đó để có thể "vứt bỏ" đi việc phải "xin xỏ" quản trị viên AWS gia tăng dung lượng của ALB tôi quyết định sử dụng NLB vì một đặc tính rất hay của nó đó là:
+Do đó để có thể "vứt bỏ" việc phải đi "xin xỏ" quản trị viên AWS gia tăng access capacity của ALB tôi quyết định sử dụng NLB vì một đặc tính rất hay của nó đó là:
 
 > NLB được thiết kế để đáp ứng các ứng dụng với lưu lượng truy cập cao, NLB có khả năng xử lí "cả triệu requests trên giây" với độ trễ cực thấp.
-
-như tôi đã trình bày ở trên
 
 ## Hệ thống sau khi di chú sang NLB
 
@@ -102,7 +100,7 @@ Trên thực tế, trong EC2 web instance của tôi, ngoài code của web tôi
 
 *Các bạn có thể tham khảo thêm về Reverse Proxy tại [đây](https://viblo.asia/p/forward-proxy-vs-reverse-proxy-7ymJXXQ6Jkq)*
 
-Do đó tôi quyết định, toàn bộ việc `routing sang API` hay `redirect từ HTTP sang HTTPs` sẽ do **nginx**
+Do đó tôi quyết định, toàn bộ việc `routing sang API` hay `redirect từ HTTP sang HTTPs` sẽ do **nginx** đảm nhận.
 
 Với lời gọi API tôi xử lí như sau:
 
