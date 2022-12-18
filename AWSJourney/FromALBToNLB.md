@@ -164,7 +164,7 @@ Giải thích một cách đơn giản thì khi người dùng truy cập vào �
 
 Đó là về phần routing và redirect. Đi sâu một chút nữa xuống mức `Security Group` ta sẽ thấy rằng, mọi request đều được NLB forward thẳng đến EC2 instance do đó với các EC2 instance ta cũng cần "mở toang" 2 cổng `80` và `81` cho mọi địa chỉ IP - cụ thể là `0.0.0.0/0` với giao thức `HTTP` để EC2 instance có thể nhận được mọi requests đến từ các người dùng khác nhau (tôi áp dụng Security Group dạng này cho cả `EC2 web instance` và `EC2 api instance`).
 
-[Screen Shot 2022-12-18 at 17 27 33](https://user-images.githubusercontent.com/15076665/208291232-ee1245d7-e22d-4cad-b3a5-c5e41afd4706.png)
+![Screen Shot 2022-12-18 at 17 27 33](https://user-images.githubusercontent.com/15076665/208291232-ee1245d7-e22d-4cad-b3a5-c5e41afd4706.png)
 
 ## Hình hài cuối cùng của hệ thống
 
