@@ -127,18 +127,18 @@ Tại NLB cho web, tôi thiết lập 2 listeners:
 - TCP:80 - Dùng cho kết nối `HTTP`
 - TLS:443 - Dùng cho kết nối `HTTPs`
 
-[Screen Shot 2022-12-18 at 17 30 22](https://user-images.githubusercontent.com/15076665/208291187-014f4630-415d-4c66-ae2d-34e66b6e93a4.png)
+![Screen Shot 2022-12-18 at 17 30 22](https://user-images.githubusercontent.com/15076665/208291187-014f4630-415d-4c66-ae2d-34e66b6e93a4.png)
 
-[Screen Shot 2022-12-18 at 17 30 46](https://user-images.githubusercontent.com/15076665/208291189-df9a9863-4680-484d-a392-6be87c5d8a3a.png)
+![Screen Shot 2022-12-18 at 17 30 46](https://user-images.githubusercontent.com/15076665/208291189-df9a9863-4680-484d-a392-6be87c5d8a3a.png)
 
 Tương ứng với mỗi listener này sẽ là các TargetGroup khác nhau đôi một:
 
 - TCP:80 - http-web-target-group
 - TLS:443 - https-web-target-group
 
-[Screen Shot 2022-12-18 at 17 33 48](https://user-images.githubusercontent.com/15076665/208291126-d332aba3-3007-4ee6-bb4a-18b10e272c53.png)
+![Screen Shot 2022-12-18 at 17 33 48](https://user-images.githubusercontent.com/15076665/208291126-d332aba3-3007-4ee6-bb4a-18b10e272c53.png)
 
-[Screen Shot 2022-12-18 at 17 33 59](https://user-images.githubusercontent.com/15076665/208291129-e08437d5-c899-423a-8a65-7fb3383c2058.png)
+![Screen Shot 2022-12-18 at 17 33 59](https://user-images.githubusercontent.com/15076665/208291129-e08437d5-c899-423a-8a65-7fb3383c2058.png)
 
 Chú ý: nếu với `ALB` ta cần thiết lập TargetGroup với protocol là `HTTP` thì với `NLB` ta cần thiết lập protocol là `TCP`
 
