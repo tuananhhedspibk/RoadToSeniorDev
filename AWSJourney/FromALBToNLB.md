@@ -127,10 +127,18 @@ Tại NLB cho web, tôi thiết lập 2 listeners:
 - TCP:80 - Dùng cho kết nối `HTTP`
 - TLS:443 - Dùng cho kết nối `HTTPs`
 
+[Screen Shot 2022-12-18 at 17 30 22](https://user-images.githubusercontent.com/15076665/208291187-014f4630-415d-4c66-ae2d-34e66b6e93a4.png)
+
+[Screen Shot 2022-12-18 at 17 30 46](https://user-images.githubusercontent.com/15076665/208291189-df9a9863-4680-484d-a392-6be87c5d8a3a.png)
+
 Tương ứng với mỗi listener này sẽ là các TargetGroup khác nhau đôi một:
 
 - TCP:80 - http-web-target-group
 - TLS:443 - https-web-target-group
+
+[Screen Shot 2022-12-18 at 17 33 48](https://user-images.githubusercontent.com/15076665/208291126-d332aba3-3007-4ee6-bb4a-18b10e272c53.png)
+
+[Screen Shot 2022-12-18 at 17 33 59](https://user-images.githubusercontent.com/15076665/208291129-e08437d5-c899-423a-8a65-7fb3383c2058.png)
 
 Chú ý: nếu với `ALB` ta cần thiết lập TargetGroup với protocol là `HTTP` thì với `NLB` ta cần thiết lập protocol là `TCP`
 
@@ -155,6 +163,8 @@ server {
 Giải thích một cách đơn giản thì khi người dùng truy cập vào địa chỉ `http://www.web.com`, request sẽ được NLB chuyển tới `http-web-target-group`, target group này sẽ chuyển đến EC2 instance, tại đây nginx đang lắng nghe ở cổng 81 sẽ nhận được request và redirect nó sang địa chỉ `https://www.web.com`
 
 Đó là về phần routing và redirect. Đi sâu một chút nữa xuống mức `Security Group` ta sẽ thấy rằng, mọi request đều được NLB forward thẳng đến EC2 instance do đó với các EC2 instance ta cũng cần "mở toang" 2 cổng `80` và `81` cho mọi địa chỉ IP - cụ thể là `0.0.0.0/0` với giao thức `HTTP` để EC2 instance có thể nhận được mọi requests đến từ các người dùng khác nhau (tôi áp dụng Security Group dạng này cho cả `EC2 web instance` và `EC2 api instance`).
+
+[Screen Shot 2022-12-18 at 17 27 33](https://user-images.githubusercontent.com/15076665/208291232-ee1245d7-e22d-4cad-b3a5-c5e41afd4706.png)
 
 ## Hình hài cuối cùng của hệ thống
 
