@@ -71,6 +71,37 @@ Kết quả:
 
 Khái niệm key thường chỉ nằm ở mức "cột" (dùng để phân biệt các dòng với nhau) trong khi index là một cấu trúc dữ liệu có tầm ảnh hưởng đến việc truy vấn dữ liệu trên toàn bộ bảng.
 
+### Điều gì sẽ xảy ra nếu không tạo primary key ?
+
+Việc tạo primary key là không bắt buộc khi tạo bảng, tuy nhiên InnoDB bắt buộc phải có primary key cho từng bảng nên do đó, trong trường hợp ta không tự tạo primary key cho bảng thì InnoDB sẽ tự động tạo primary key cho bảng đó.
+
+Nếu ta thêm primary key cho bảng thì InnoDB sẽ tự động xoá key mà nó tự tạo cho bảng trước đó
+
+```sql
+SHOW EXTENDED INDEX FROM index_demo;
+```
+
+`EXTENDED` sẽ đưa ra các indices không thể sử dụng nhưng lại được quản lí bởi MySQL.
+
+```sql
+SHOW INDEXES FROM index_demo;
+```
+
+- **Collation**: Thứ tự sắp xếp, `A`: ascending, `D`: descending, `NULL`: không được sắp xếp.
+- **Cardinality**: số lượng unique values trong index
+
+```sql
+EXPLAIN SELECT * FROM index_demo WHERE phone_no = '90123123213123';
+```
+
+Chạy câu query trên ta thu được kết quả như sau:
+
+![Screen Shot 2022-12-24 at 19 35 01](https://user-images.githubusercontent.com/15076665/209432180-3f9b3f2c-e28d-42a4-8b5e-f7d1be7846c3.png)
+
+Số lượng row tác động ở đây chỉ là `1` nên do đó ta thấy index có tác dụng thu hẹp phạm vi mà câu query chạy trên đó.
+
+### Clustered Index
+
 ## Tài liệu tham khảo
 
 - https://medium.com/free-code-camp/database-indexing-at-a-glance-bb50809d48bd
