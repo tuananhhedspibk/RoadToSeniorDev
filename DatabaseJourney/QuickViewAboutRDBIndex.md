@@ -102,6 +102,41 @@ Số lượng row tác động ở đây chỉ là `1` nên do đó ta thấy in
 
 ### Clustered Index
 
+Clustered index nằm cùng vị trí với data trong cùng một table space hoặc cùng file trên ổ đĩa. Ta có thể coi clustered index như một `B-tree` index với các nodes lá là các data block trên đĩa, do đồng thời index và data sẽ nằm cùng một chỗ.
+
+![Screen Shot 2022-12-25 at 22 02 40](https://user-images.githubusercontent.com/15076665/209468967-5166ddcb-b91d-45f7-98ca-c2bf3b6db0d6.png)
+
+Trong hình trên:
+
+- Các hình chữ nhật màu xanh sẽ là các data record lưu dưới dạng các dòng
+- Hình chữ nhật màu vàng sẽ là data block
+- Hình chữ nhật màu đỏ sẽ là các con trỏ, trỏ tới các record màu xanh (đây chính là các index blocks), thứ tự của các hình chữ nhật màu đỏ sẽ là thứ tự logic của các records.
+
+Khi records được thêm mới thì chúng sẽ được cấp phát các không gian còn trống tiếp theo. Khi một record được update thì hệ điều hành sẽ quyết định xem: cấp phát bộ nhớ mới cho record hay vẫn sử dụng phần bộ nhớ cũ do vẫn đủ dung lượng.
+
+Vị trí của các records sẽ được quyết định bởi hệ điều hành.
+
+Khi có record được thêm mới hoặc cập nhật, xoá đi thì index cũng sẽ được cập nhật theo.
+
+### Ưu điểm của Clustered Index
+
+Khi dữ liệu được lấy về từ câu query, chúng sẽ được lấy ra dưới dạng `block` do IO System đọc và ghi dữ liệu ở dạng `block`. Dữ liệu sau khi lấy ra sẽ được đưa vào `buffer memory`.
+
+```sql
+SELECT * FROM index_demo WHERE phone_no > '9010000000' AND phone_no < '9030000000'
+```
+
+Lấy ví dụ với câu query trên, dữ liệu liên quan đến range sẽ được lấy ra và đưa vào buffer, nên câu query với range "hẹp hơn"
+
+```sql
+SELECT * FROM index_demo WHERE phone_no > '9012000000' AND phone_no < '9019000000';
+```
+
+Sẽ được lấy ra ngay từ buffer nên sẽ cải thiện tốc độ truy vấn lên trông thấy.
+
+Chú ý rằng: ta chỉ có thể có **DUY NHẤT MỘT clustered index** cho mỗi bảng.
+
+
 ## Tài liệu tham khảo
 
 - https://medium.com/free-code-camp/database-indexing-at-a-glance-bb50809d48bd
