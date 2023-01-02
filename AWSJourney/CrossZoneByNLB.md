@@ -38,3 +38,22 @@ Giả sử trong trường hợp instance phía bên phải không truy cập đ
 Nhờ đó, kể cả khi số lượng instance bị giảm đi thì các địa chỉ IP vẫn luôn luôn ở trạng thái "khả dụng", tuy nhiên lúc này do số lượng instance giảm đi nên lượng tải mà instance phải chịu cũng sẽ tăng lên.
 
 ### Cân bằng tải giữa các zones
+
+Tiếp theo ta sẽ xét đến trường hợp 4 instances được khởi động, ta có 2AZ, tương ứng với mỗi AZ sẽ là 2 instances.
+
+![NLB-Non-CrossZone-1](https://user-images.githubusercontent.com/15076665/209753048-62c643a6-c7b4-40de-9291-68ebfcf8b8f0.png)
+
+Tuy nhiên vẫn có thể có trường hợp phân bổ các EC2 instances giữa các AZs bị lệch như hình bên dưới:
+
+![NLB-Non-CrossZone-2](https://user-images.githubusercontent.com/15076665/209753247-1774cd93-dc9a-4b14-a715-fddc538a9d6c.png)
+
+Do NLB sẽ phân bổ tải cân bằng đến các instances nên mô hình chung ta sẽ có phân bổ tải như sau: 1/2 & 1/6, 1/6, 1/6 - hình minh hoạ bên dưới
+
+![NLB-Non-CrossZone-2-2](https://user-images.githubusercontent.com/15076665/209753334-55180f6c-48b8-4ba8-912b-2c62c22a9990.png)
+
+Với cross-zone balacing, NLB sẽ tiến hành phân bổ tải đều lên các instances do đó các instance sẽ được sử dụng đúng và đủ công suất.
+
+![NLB-CrossZone-2-3](https://user-images.githubusercontent.com/15076665/209753582-8e19ad82-030e-4d32-a228-644fdb2b5e0c.png)
+
+## Chú ý
+
