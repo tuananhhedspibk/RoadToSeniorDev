@@ -17,8 +17,8 @@
 
 ## Data types
 
-[Screen Shot 2023-01-02 at 19 14 39](https://user-images.githubusercontent.com/15076665/210219618-bbaf64ea-6d08-4ca4-92d4-a05ee87200ee.png)
+![Screen Shot 2023-01-02 at 19 14 39](https://user-images.githubusercontent.com/15076665/210219618-bbaf64ea-6d08-4ca4-92d4-a05ee87200ee.png)
 
 ## High level design
 
-[Screen Shot 2023-01-02 at 19 29 23](https://user-images.githubusercontent.com/15076665/210219623-9b0797b0-1b9f-4503-b24e-c8612571cb28.png)
+![Screen Shot 2023-01-02 at 19 29 23](https://user-images.githubusercontent.com/15076665/210219623-9b0797b0-1b9f-4503-b24e-c8612571cb28.png)
