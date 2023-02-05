@@ -51,3 +51,37 @@ Có 4 loại ngoại lệ chính ở đây:
 3. **Droppable Exception**
 4. **DLQable Exception**
 
+#### Retryable Exception
+
+Đây là loại lỗi khá đơn giản, ta có thể giải quyết nó bằng cách "thử lại" thao tác thêm một lần nữa. Một ví dụ kinh điển đó là khi hệ thống của bạn tương tác với hệ thống bên ngoài và gặp một vài sự cố kiểu như:
+
+- Timeout.
+- Kết nối bị mất tạm thời.
+
+Với những lỗi như vậy ta chỉ cần "thử lại" vài lần là đủ. Với lỗi dạng `Kết nối HTTP tới Data Store bị ngắt quãng`, ta thường sẽ xử lí bằng cách "thử lại - retry".
+
+Retry là một công cụ phổ biến tuy nhiên hãy nhớ đến **retry limit**, bạn cũng có thể sử dụng **circuit breaker**, **exponential backoff**, ...
+
+> Xin được nhấn mạnh lại là Retryable exception là một lỗi phổ biến mà không chỉ mỗi hệ thống hướng sự kiện mới gặp phải
+
+#### Requeable Exception
+
+Vấn đề ở đây đó là hệ thống của bạn không thể xử lí message hiện thời được (nguyên nhân có thể là do một vài services trong hệ thống đang gặp sự cố về tính toàn vẹn của dữ liệu hoặc quá trình xử lí dữ liệu của service khác đang bị trễ một vài phút), do đó tại một thời điểm nào đó trong tương lai khi các services của hệ thống ở trong trạng thái sẵn sàng 100% thì message sẽ được xử lí.
+
+Mặt khác nếu bạn không tiến hành xử lí những lỗi của các services nêu trên thì việc xử lí các messages khác cũng sẽ bị ngưng trệ. **Distributed transactional systems** thường xuyên gặp những lỗi tương tự như vậy.
+
+Vậy giải pháp ở đây là gì? Ta sẽ lấy message đó ra, đưa xuống cuối hàng đợi xử lí và "retry" tại một thời điểm khác.
+
+Do đó với lỗi `processor không thể tìm thấy dữ liệu từ data warehouse nguyên nhân do một vài services khác bị trễ trong việc tìm kiếm dữ liệu trên` ta có thể xử lí bằng cách **Requeing**.
+
+`Retryable Exception` & `Requeable Exception` có mối liên hệ với nhau. Cụ thể như sau, nếu trong trường hợp số lần retry đạt đến ngưỡng tối đa nhưng hệ thống vẫn không thể xử lí được message thì lúc này nguyên nhân chắc chắn **không phải** do sender, message hoàn toàn không có vấn đề, vấn đề nằm ở service của chúng ta, nếu cứ "retry một cách mù quáng" thì sẽ làm ảnh hưởng đến việc xử lí các messages khác, do đó
+
+> Khi retry đạt tới ngưỡng tối đa, hãy nghĩ đến requeue
+
+#### Poison Pill
+
+Poison pill là một message mà phía consumer không thể xử lí được dù retry bao nhiêu lần đi chăng nữa. Ví dụ nếu message không thể `deserializing` và nó không bao giờ được xử lí, dẫn đến việc toàn bộ các messages phía sau bên trong queue cũng sẽ không được xử lí theo.
+
+Dù bản thân queue cũng có cơ chế tự loại bỏ đi các message "lỗi" kiểu vậy, thế nhưng cho đến khi message này bị loại bỏ, nó sẽ làm cho toàn bộ hệ thống bị "kẹt", đây là một điều rất nguy hiểm.
+
+#### Droppable Exception
