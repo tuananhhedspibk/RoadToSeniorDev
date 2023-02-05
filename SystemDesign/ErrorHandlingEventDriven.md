@@ -85,3 +85,23 @@ Poison pill là một message mà phía consumer không thể xử lí được 
 Dù bản thân queue cũng có cơ chế tự loại bỏ đi các message "lỗi" kiểu vậy, thế nhưng cho đến khi message này bị loại bỏ, nó sẽ làm cho toàn bộ hệ thống bị "kẹt", đây là một điều rất nguy hiểm.
 
 #### Droppable Exception
+
+Với ngoại lệ thuộc dạng này, ta có thể bỏ qua mà không xử lí vì bản thân message là không hợp lệ. Lấy ví dụ như sau: message sử dụng enum type không có trong định nghĩa cho trước, đây là lỗi được biết từ trước do đó ta có thể nhận về message nhưng không xử lí.
+
+Với ngoại lệ thuộc dạng này chúng ta sẽ định danh như sau: `Message nhận được không được hỗ trợ xử lí bởi ứng dụng`.
+
+#### DLQable Exception
+
+Đây còn được gọi là `Unhandled Exceptions`. Đây là những lỗi mà bạn không thể đoán được trước, nhưng cũng cần phải tìm hiểu nguyên nhân chính gây ra nó và đồng thời không thể để nó trở thành `Poison Pill`.
+
+Nên ở đây ta sẽ đưa nó vào một queue khác đó là `Dead Letter Queue` - để sau đó ta có thể phân tích, tìm ra nguyên nhân gây ra lỗi cũng như các ngoại lệ khác phát sinh đi kèm theo message này.
+
+Ngoài việc phân tích message, ta cũng có thể điều chỉnh lại nó để message trở nên hợp lệ.
+
+Định danh cho ngoại lệ này chính là `Consumer không thể xử lí message vì cấu trúc JSON không hợp lệ`.
+
+## Code
+
+Dưới đây sẽ là code minh hoạ cho những ý tưởng nói ở trên.
+
+1. 
