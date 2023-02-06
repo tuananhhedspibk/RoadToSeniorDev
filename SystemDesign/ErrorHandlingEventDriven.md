@@ -104,4 +104,60 @@ Ngoài việc phân tích message, ta cũng có thể điều chỉnh lại nó 
 
 Dưới đây sẽ là code minh hoạ cho những ý tưởng nói ở trên.
 
-1. 
+1. Core error-handling logic sẽ nằm ở trong `consumer` vì flow bắt đầu từ đây. Ở đây bạn sẽ thấy được các loại exception khác nhau được xử lí như thế nào cũng như cái cách mà `Retryable Exception` biến thành `Requeable Exception`
+
+```java
+public void consume(Message<String> message) {
+  try {
+    final EventHandler handler = subscriptionMap.get(event);
+    processWithRetry(handler, message);
+  } catch (RequeableException e) {
+    failureHandler.reQueue(message, e);
+  } catch (DroppableException e) {
+    failureHandler.dropMessage(message, e);
+  } catch (Exception e) {
+    failureHandler.putOnDlq(message, e);
+  }
+}
+
+private void processWithRetry(EventHandler handler, Message<String> message) throws Exception {
+  retryTemplate.execute(context -> {
+    handler.handle(message); // Processing delegated to the handler method
+    return null;
+  }, context -> {
+    final Exception originalError = (Exception) context.getLastThrowable();
+    if (originalError instanceof RetryableException) {
+      throw new RequeableException(originalError); // After cutoff RetryableException exception becomes RequeableException
+    }
+  }
+}
+```
+
+2. Retry config
+
+```java
+ public RetryTemplate eventConsumerRetryTemplate(int maxAttempts) {
+  return RetryTemplate.builder()
+    .retryOn(RetryableException.class)
+    .maxAttempts(maxAttempts)
+    .exponentialBackoff(100, 2, 300)
+    .traversingCauses()
+    .build();
+}
+```
+
+3. Handler/processor xử lí message, giới hạn lại method thực sự đưa ra exception, đóng gói các exceptions lại vào trong 4 kiểu mà chúng ta đã định nghĩa
+
+```java
+public void handle(Message<String> message)
+  throws RetryableException, DroppableException, DlqableException {
+  try {
+    doStuff(message);
+  } catch (IllegalArgumentException ex) {
+    throw new DlqableException(ex);
+  }
+}
+```
+
+Các đoạn code phía trên mang tính tổng quát khá cao, tuy nhiên chúng có thể giúp bạn hiểu được ý tưởng cốt lõi ở đây đó là **Chúng ta có thể xử lí lỗi theo 4 cách thông qua việc phân loại các lỗi đó thành 4 loại**, bằng cách làm này, chúng ta có thể đưa ra một cơ chế xử lí lỗi rõ ràng cho hệ thống và giúp hệ thống có thể "dễ đoán định" hơn.
+
