@@ -37,3 +37,9 @@ Do đó các thông tin khác, ví dụ như thông tin về `stock count` của
 Nếu **event producers** và **event consumer** không hề biết gì về nhau, vậy thì chúng sẽ giao tiếp với nhau bằng cách nào ?
 
 Events thường được lưu trữ ở một nơi được gọi là **log** (Đôi khi thuật ngữ **ledger** có thể được sử dụng). Logs là một dạng cấu trúc dữ liệu append-only bậc thấp, log là nơi mà producer sẽ lưu các events để sau đó các consumer có thể truy cập và lấy về các events. Mọi thao tác với log đều do **brokers** - một middleware nằm ở giữa producers và consumers đảm nhận. Khi một event được publish thì tất cả mọi đối tượng đều có thể sử dụng event đó.
+
+Khi triển khai event-driven systems, chúng ta thường sử dụng thuật ngữ **stream** để chỉ một hoặc nhiều logs. Log là một thuật ngữ mang tính chất "vật lý" khi nó sử dụng các file để lưu trữ, còn stream mang tính logic khi nó là một **chuỗi các events**. `Apache Kafka` là một streaming platform khá bổ biến - các streams được để cập đến bởi 2 thuật ngữ **topics** & **partitions**.
+
+Mối liên hệ giữa producers, consumers và streams có thể được mô tả như mô hình dưới đây
+
+![Screen Shot 2023-02-11 at 23 04 05](https://user-images.githubusercontent.com/15076665/218262320-929052fb-b174-4dd2-91b9-3a39b285e953.png)
