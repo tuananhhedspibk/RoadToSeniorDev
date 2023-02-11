@@ -104,7 +104,7 @@ Ngoài việc phân tích message, ta cũng có thể điều chỉnh lại nó 
 
 Dưới đây sẽ là code minh hoạ cho những ý tưởng nói ở trên.
 
-1. Core error-handling logic sẽ nằm ở trong `consumer` vì flow bắt đầu từ đây. Ở đây bạn sẽ thấy được các loại exception khác nhau được xử lí như thế nào cũng như cái cách mà `Retryable Exception` biến thành `Requeable Exception`
+① Core error-handling logic sẽ nằm ở trong `consumer` vì flow bắt đầu từ đây. Ở đây bạn sẽ thấy được các loại exception khác nhau được xử lí như thế nào cũng như cái cách mà `Retryable Exception` biến thành `Requeable Exception`
 
 ```java
 public void consume(Message<String> message) {
@@ -133,7 +133,7 @@ private void processWithRetry(EventHandler handler, Message<String> message) thr
 }
 ```
 
-2. Retry config
+② Retry config
 
 ```java
  public RetryTemplate eventConsumerRetryTemplate(int maxAttempts) {
@@ -146,7 +146,7 @@ private void processWithRetry(EventHandler handler, Message<String> message) thr
 }
 ```
 
-3. Handler/processor xử lí message, giới hạn lại method thực sự đưa ra exception, đóng gói các exceptions lại vào trong 4 kiểu mà chúng ta đã định nghĩa
+③ Handler/processor xử lí message, giới hạn lại method thực sự đưa ra exception, đóng gói các exceptions lại vào trong 4 kiểu mà chúng ta đã định nghĩa
 
 ```java
 public void handle(Message<String> message)
@@ -160,4 +160,3 @@ public void handle(Message<String> message)
 ```
 
 Các đoạn code phía trên mang tính tổng quát khá cao, tuy nhiên chúng có thể giúp bạn hiểu được ý tưởng cốt lõi ở đây đó là **Chúng ta có thể xử lí lỗi theo 4 cách thông qua việc phân loại các lỗi đó thành 4 loại**, bằng cách làm này, chúng ta có thể đưa ra một cơ chế xử lí lỗi rõ ràng cho hệ thống và giúp hệ thống có thể "dễ đoán định" hơn.
-
