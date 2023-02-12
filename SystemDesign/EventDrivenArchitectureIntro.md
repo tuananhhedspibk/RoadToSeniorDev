@@ -53,3 +53,28 @@ Mối liên hệ giữa producers, consumers và streams có thể được mô 
 - **Vai trò của consumers và producers có thể chồng chéo nhau**. Ví dụ, việc consumer xử lí một event có thể dẫn tới việc phát sinh một event khác.
 
 ## Decoupling thông qua bất đồng bộ và tổng quát hoá
+
+Quay trở về điểm khởi đầu, *Tại sao EDA giúp các thành phần trong hệ thống giảm phụ thuộc vào nhau ?*
+
+Một định nghĩa đơn giản về độ phụ thuộc đó là **mức độ một component làm ảnh hưởng đến các components khác**.
+
+Một ví dụ tiêu biểu đó là khi một service gọi một REST API khác và chờ kết quả trả về từ API đó, nếu trong trường hợp REST API kia gặp trục chặc và không trả về kết quả được thì service gọi đến API sẽ phải dừng mọi xử lí phía sau lời gọi API đó.
+
+Ta nói rằng các components là *tightly coupled* nếu chúng phụ thuộc chặt chẽ vào nhau và *loosely coupled* trong trường hợp ngược lại.
+
+![Screen Shot 2023-02-12 at 21 44 40](https://user-images.githubusercontent.com/15076665/218311996-26469db4-0e51-4a01-80fc-c4a1cc368790.png)
+
+1. Nhắc lại là events *chỉ xảy ra*. Event procuder không hề biết đến sự tồn tại của các components khác. Do đó producer vẫn sẽ làm việc ngay cả khi consumer không hoạt động, thế nên bản thân broker cũng sẽ định kì buffer các event records mà không gặp phải "sự thúc bách" nào từ phía producer.
+2. Việc lưu trữ các event records trong broker giúp xoá tan đi định nghĩa về mặt thời gian. Cụ thể là producer có thể publish event ở thời điểm *T1*, consumer sẽ "tiêu hoá" event đó ở thời điểm *T2*, về cơ bản *T1* và *T2* sẽ chênh lệch nhau vài milisecond (nếu mọi thứ hoạt động tốt) hoặc vài giờ (nếu một vài consumers gặp trục trặc).
+
+EDA không phải là "viên đạn bạc" hay "một liều thuốc tiên" giúp ta có thể tách bạch các components ra khỏi nhau hoàn toàn. Trên thực tế khi producer và consumer không phụ thuộc vào nhau nữa thì chúng lại **phụ thuộc vào broker**, dẫn đến một **điểm lỗi** mới đó chính là broker, nên broker phải đảm bảo **hiệu năng cao cũng như tính chịu lỗi tốt**.
+
+## Các hình thứ xử lí event
+
+Có thể phân ra thành 3 nhóm chính như dưới đây:
+
+### Xử lí event rời rạc (Discrete event processing)
+
+Ví dụ như khi post một bài đăng lên mạng xã hội. Một trong số đặc trưng của việc xử lí event rời rạc đó là sự hiện diện của một event không hề liên quan đến các events khác và hoàn toàn có thể được xử lí độc lập.
+
+### Event stream processing
