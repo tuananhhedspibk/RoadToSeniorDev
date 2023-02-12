@@ -43,3 +43,13 @@ Khi triển khai event-driven systems, chúng ta thường sử dụng thuật n
 Mối liên hệ giữa producers, consumers và streams có thể được mô tả như mô hình dưới đây
 
 ![Screen Shot 2023-02-11 at 23 04 05](https://user-images.githubusercontent.com/15076665/218262320-929052fb-b174-4dd2-91b9-3a39b285e953.png)
+
+- **Events xảy ra ở những thời điểm khác nhau**
+- **Events tồn tại dưới hình thức records**. Events và records là hai thuật ngữ khác nhau về mặt kĩ thuật. Event dùng để chỉ một hành động hoặc một điều gì đó xảy ra. Record chứa thông tin mô tả về event. Ở đây chúng ta thường sử dụng thuật ngữ *event* để chỉ đến record của nó.
+- **Producers phát hiện các events bằng cách publish các records tương ứng với chúng vào stream**.
+- **Stream lưu trữ các chuỗi records**. Stream có thể được tạo nên dựa trên nền tảng là các disk-based **log** hoặc cũng có thể là **database tables**, ...
+- **Brokers quản lí truy cập đến streams**, theo dõi các thao tác đọc và ghi (reading & writing), xử lí consumer state, cũng như quản lí các tasks trên streams. Ví dụ: broker có thể cắt bỏ bớt các contents trên stream khi stream trở nên quá tải với lượng records hiện tại.
+- **Consumer đọc từ streams và xử lí records**. Việc xử lí event có thể dẫn đến các side-effect như: chèn thêm entity vào database hoặc tái cấu trúc state của một remote entity, ...
+- **Vai trò của consumers và producers có thể chồng chéo nhau**. Ví dụ, việc consumer xử lí một event có thể dẫn tới việc phát sinh một event khác.
+
+## Decoupling thông qua bất đồng bộ và tổng quát hoá
