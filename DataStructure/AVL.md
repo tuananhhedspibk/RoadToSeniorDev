@@ -69,3 +69,39 @@ Nghĩa là trường hợp độ cao cây con bên trái lớn hơn cây con bê
 Đây là trường hợp mà cây con phải cao hơn 2 đơn vị so với cây con trái và cây con phải bị "lệch phải". Ta giải quyết bằng cách "xoay trái" ở node mất cân bằng.
 
 ![Screen Shot 2023-02-18 at 19 26 57](https://user-images.githubusercontent.com/15076665/219855438-ca8e2f3f-0c06-45d2-af07-763c69684596.png)
+
+### Right left
+
+Đây là trườngh hợp mà cây con phải cao hơn cây con trái 2 đơn vị và cây con phải bị lệch trái. Ta xử lí như sau: "xoay phải" cây con phải, sau đó "xoay trái" node mất cân bằng là được.
+
+![Screen Shot 2023-02-18 at 22 27 34](https://user-images.githubusercontent.com/15076665/219868401-9ac84b76-5255-45da-b63b-22fd66f3166f.png)
+
+## Các thao tác
+
+### Delete
+
+Thao tác xoá sẽ thực hiện bằng cách xoá bỏ đi node với key muốn xoá, sau đó đi ngược lên gốc và cân bằng lại các nodes bị mất cân bằng.
+
+### Insert
+
+Đầu tiên chèn thêm node vào vị trí thích hợp, sau đó đi ngược lên gốc và cân bằng lại các nodes bị mất cân bằng.
+
+### Search
+
+Tương tự như BST vì AVL bảo toàn tất cả các thuộc tính của BST.
+
+## Trường hợp cân bằng tồi tệ nhất
+
+Cụ thể là một node con của một node có độ cao hơn 1 đơn vị so với các node con khác.
+
+![Screen Shot 2023-02-18 at 22 48 11](https://user-images.githubusercontent.com/15076665/219869286-3b5c54ad-b503-41a6-9d20-831216c75434.png)
+
+![Screen Shot 2023-02-18 at 22 49 30](https://user-images.githubusercontent.com/15076665/219869347-64312a77-daf2-434c-8a8d-4a18c041f104.png)
+
+Ta có thể rút ra công thức tính độ cao cho cây một cách "đệ quy" như sau:
+
+```matlab
+Fh = Fh-1 + Fh-2 + 1
+```
+
+Công thức trên khá gần với công thức tính số Fibonaci. Điều này đồng nghĩa với việc trong trường hợp tồi tệ nhất của cây cân bằng số lượng nodes sẽ tăng theo cấp số mũ, tuy nhiên độ cao của cây cũng vẫn chỉ là `O(logn)`
