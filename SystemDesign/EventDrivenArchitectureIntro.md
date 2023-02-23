@@ -78,3 +78,23 @@ Có thể phân ra thành 3 nhóm chính như dưới đây:
 Ví dụ như khi post một bài đăng lên mạng xã hội. Một trong số đặc trưng của việc xử lí event rời rạc đó là sự hiện diện của một event không hề liên quan đến các events khác và hoàn toàn có thể được xử lí độc lập.
 
 ### Event stream processing
+
+Xử lí các event theo luồng, có tính đến thứ tự của các events, khi mà event hiện tại có liên quan đến event trong quá khứ. Một ví dụ tiêu biểu đó là các events thay đổi lên business entity. Các events này sẽ được xử lí theo một thứ tự nhất định, sau đó sẽ lưu business entity data vào trong database. Consumer cũng cần tránh tình trạng đồng thời thay đổi lên cùng một record của database khiến cho dữ liệu không được nhất quán.
+
+### Complex event processing
+
+Complex event processing (CEP) định danh và đưa ra các event pattern phức tạp dựa trên một chuỗi các event đơn giản. Ta lấy ví dụ về CEP cho việc theo dõi nhiệt độ và khói từ các cảm biến để phát hiện xem có xảy ra hoả hoạn hay không. Dữ liệu về nhiệt độ ở một thời điểm có thể không mang quá nhiều ý nghĩa nhưng với một "cụm nhiệt độ" cũng với tỉ lệ thay đổi nhiệt độ thì ta hoàn toàn có thể phán đoán được rằng liệu có đang xảy ra hoả hoạn hay không.
+
+## Khi nào thì sử dụng EDA (Event Driven Architecture)
+
+Có một vài use-cases tiêu biểu như sau:
+
+1. **Opaque consumer ecosystem**: khi mà producers hầu như không biết gì về consumers.
+2. **High fan-out**: kịch bản khi mà một event có thể được xử lí bởi nhiều consumers khác nhau.
+3. **Complex pattern matching**: khi mà các events có thể được "xâu chuỗi" lại để đưa ra các events phức tạp hơn.
+4. **Command-query responsibility segregation**: CQRS là một pattern nhằm phân chia các thao tác đọc & ghi lên data store. Việc triển khai CQRS sẽ giúp hệ thống có khả năng mở rộng cao hơn cũng như tăng tính tin cậy cho hệ thống, đổi lại sẽ là sự nhất quán trong dữ liệu có thể sẽ không được hoàn chỉnh như mong muốn. Pattern này thường đi đôi với EDA.
+
+## Lợi ích của EDA
+
+1. **Buffering & fault-tolerance**: Events có thể được xử lí ở các mức độ khác nhau tuỳ theo ứng dụng và producer không cần phải "tự làm chậm mình" để consumer có thể đuổi kịp.
+
