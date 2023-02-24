@@ -98,3 +98,32 @@ Có một vài use-cases tiêu biểu như sau:
 
 1. **Buffering & fault-tolerance**: Events có thể được xử lí ở các mức độ khác nhau tuỳ theo ứng dụng và producer không cần phải "tự làm chậm mình" để consumer có thể đuổi kịp.
 
+2. **Decoupling producer & consumer**: giảm sự phụ thuộc lẫn nhau giữa producer và consumer. Từ đó ta có thể dễ dàng thêm hoặc bớt consumers và producers vào hệ thống.
+
+3. **Dễ dàng scale**: chúng ta có thể dễ dàng phân các events vào các substream khác nhau và xử lí chúng một cách song song cũng như thêm các consumers để có thể kịp thời xử lí số lượng lớn các events.
+
+## Nhược điểm của EDA
+
+1. **Giới hạn trong việc xử lí bất đồng bộ**: EDA là một pattern khá mạnh trong việc giảm sự phụ thuộc lẫn nhau giữa các components, xong nó lại gặp ít nhiều hạn chế với xử lí bất đồng bộ.
+
+2. **Phát sinh thêm những vấn đề phức tạp mới**: với mô hình client-server, request-response truyền thống ta chỉ cần có **2 nhân tố chính** mà thôi, trong khi với EDA ta còn cần thêm cả **broker** để có thể xử lí việc tương tác giữa **consumer** và **producer**.
+
+3. **Failure masking**: với các hệ thống có sự phụ thuộc lẫn nhau, khi có một component nào đó gặp lỗi, nó sẽ làm ảnh hưởng đến các components khác vì các components khác này cũng sẽ biết rằng có component gặp lỗi (điều này là hoàn toàn không tốt khi một component làm ảnh hưởng đến toàn bộ hệ thống), thế nhưng với EDA khi các component không phụ thuộc lẫn nhau, việc 1 component gặp lỗi có thể sẽ không được các components khác biết đến. Điều này vô tình làm cho lỗi đó không được biết đến và xử lí (dù rằng nó không làm ảnh hưởng đến các components khác). Do đó với EDA ta cần có một cơ chế **logging** và **monitoring** với mỗi **event-driven component**, nhưng điều này sẽ làm tăng độ phức tạp của hệ thống.
+
+## Những điều cần lưu ý
+
+EDA không hoàn hảo 100%, cũng như các công cụ khác, nó cũng có nhược điểm riêng. Dưới đây là những nhược điểm của EDA mà các developers cũng như architecture nên chú ý khi thiết kế cũng như triển khai hệ thống hướng sự kiện (event-driven system).
+
+1. **Convoluted choreography**: việc làm giảm sự phụ thuộc lẫn nhau của các components có thể làm cho kiến trúc của hệ thống giống như **Rube Goldberg machine** khi mà business logic sẽ được triển khai bằng một chuỗi các **side-effect** được "nguỵ trang" dưới mác "event": một component đưa ra event, kích hoạt xử lí của component khác, component khác này lại đưa ra event và kích hoạt một component khác nữa, và cứ như thế ... Cách tương tác này giữa các components sẽ nhanh chóng trở nên khó hiểu và kiểm soát.
+
+2. **Nguỵ trang commands dưới mác sự kiện**: event là chỉ thuần tuý mô tả lại một điều gì đó vừa mới xảy ra chứ nó không nói về việc sự kiện hoặc một điều gì đó nên được xử lí như thế nào. Hay nó cách khác, **command** - **chỉ thị** là một chỉ dẫn trực tiếp cho một component cụ thể nào đó. Do **commands** & **events** đều là các message ngắn nên dễ có sự hiểu nhầm rằng command chính là event.
+
+3. **Khó đoán định được consumers muốn gì**: event chỉ nên chứa các thông tin cần thiết cho việc nó được xử lí ra sao. Nhưng trên thực tế chúng ta có thể thêm những thông tin "thừa thãi" khác vào event.
+
+## Tổng kết
+
+Kiến trúc microservices là một mảnh ghép cho quá trình xây dựng một hệ thống dễ dàng bảo trì, mở rộng hơn. Microservice thực sự tuyệt khi đứng ở phương diện tách các components khỏi nhau nhưng nó cũng có rất nhiều vấn đề nổi cộm. Việc chia nhỏ hệ thống từ "monolith" thành "microservice" có thể khiến chúng ta quay lại đúng nới chúng ta bắt đầu, đó chính là vấn đề "distributed monolith" - các monolith phân tán.
+
+Để hoàn thành mảnh ghép dang dở và giải quyết vấn đề phụ thuộc lẫn nhau giữa các components, chúng ta tìm kiếm đến kiến trúc hướng sự kiện - event-driven architecture.
+
+EDA là một công cụ tốt để phân tách các components trong hệ thống bằng cách mô hình hoá sự tương tác giữa chúng thông qua việc sử dụng các khái niệm *producers*, *consumers*, *events*, *streams*. Event mô tả một điều gì đó vừa mới xảy ra, nó được sinh ra và xử lí một cách bất đồng bộ bởi các components không hề biết gì về nhau. EDA cho phép các components hoạt động độc lập với nhau. Bản thân EDA không phải là hoàn hảo, nhưng nó đem lại nhiều lợi ích hơn là vấn đề. Do đó EDA có thể được xem như một thành phần không thể thiếu của bất cứ hệ thống microservices thành công nào.
