@@ -49,7 +49,7 @@ Với Rate limiting thì client sẽ rơi vào tình trạng bị "block thạm 
 Đảm bảo chỉ trả về những thông tin cần thiết mà thôi, tiến hành double-check để tránh việc trả về các thông tin nhạy cảm như:
 
 - Security
-- APi keys
+- API keys
 - ...
 
 Cũng nên cân nhắc việc loại bỏ `X-Powered-By` trong response header để tránh leak server-side info nhằm phòng ngừa việc server sẽ bị tấn công.

@@ -2,12 +2,12 @@
 
 ## Policy
 
-- **Why: Log nhằm mục đích gì**
-- Who: System nào tạo ra log (API, APP, ...)
-- When: Khi nào, thời điểm nào thì đưa ra log
-- Where: Đưa ra log ở đâu (log sẽ được gửi đến Slack, BigQuery, ...)
-- What: Log về cái gì
-- How: Đưa ra log như thế nào ???
+- **Why**: Log nhằm mục đích gì
+- **Who**: System nào tạo ra log (API, APP, ...)
+- **When**: Khi nào, thời điểm nào thì đưa ra log
+- **Where**: Đưa ra log ở đâu (log sẽ được gửi đến Slack, BigQuery, ...)
+- **What**: Log về cái gì
+- **How**: Đưa ra log như thế nào ???
 
 ## Log level
 
