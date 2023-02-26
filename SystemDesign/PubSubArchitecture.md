@@ -32,3 +32,9 @@ ngoài ra chúng ta cũng tìm hiểu thêm các công nghệ như Apache Kafka,
 Ở chiều ngược lại ta có **pull-based system**, đây là hệ thống mà ở đó subscriber có khả năng lấy về message **khi bản thân subscriber ở trạng thái sẵn sàng**. Cơ chế này phù hợp cho các hệ thống mà ở đó subscriber cần có thời gian xử lí dữ liệu trước khi nhận thêm các messages mới, cơ chế này phù hợp cho các hệ thống **Image Recognition** hoặc **NLP** chứ không hề phù hợp với hệ thống thời gian thực.
 
 ![Screen Shot 2023-02-26 at 16 43 43](https://user-images.githubusercontent.com/15076665/221398449-9b2834d6-2dea-461d-963a-bd00926aea26.png)
+
+Tiếp theo hãy cùng nhau nói về `centralized system` và `decentralized system`. Centralized system có một center hub hoặc server với vai trò làm trung gian giữa publisher và subscriber. Việc tồn tại server trung gian này sẽ giúp hệ thống dễ dàng điều khiển luồng dữ liệu hơn, tuy nhiên khi server hub bị quá tải, có thể dẫn đến tình trạng bottleneck.
+
+Ngược lại thì `decentralized system` không hề có server hub, mà thay vào đó là sự tương tác `peer-to-peer` giữa các publisher và subscriber với nhau. Việc này giúp hệ thống dễ dàng được mở rộng, song lại rất khó để có thể điều khiển được luồng dữ liệu.
+
+Vậy thì loại kiến trúc nào là sự lựa chọn tốt nhất? Câu trả lời đó là tuỳ theo yêu cầu hệ thống của bạn. Nếu hệ thống của bạn yêu cầu truyền dữ liệu thời gian thực và nhanh thì `push-based system` là một sự lựa chọn thích hợp.
