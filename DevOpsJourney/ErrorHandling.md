@@ -1,10 +1,10 @@
-# Xây dựng Error Handling System bằng Node.js
+# Xây dựng hệ thống xử lí lỗi bằng NodeJS
 
 Dịch từ [nguồn](https://www.toptal.com/nodejs/node-js-error-handling)
 
 > Xử lí lỗi không chỉ đơn thuần là giảm thời gian tìm bug cho dev mà còn là xây dựng một codebase với quy mô tương xứng với hệ thống của bạn
 
-## Types of Errors in Node.js
+## Các loại lỗi trong NodeJS
 
 Trong Node.js có 2 loại errors chính:
 
@@ -74,7 +74,7 @@ if (!user) {
 }
 ```
 
-## Centralized Node.js Error-handling
+## Xử lí lỗi bằng NodeJS một cách tập trung
 
 Việc xây dụng một component với chức năng để xử lí lỗi sẽ giúp giảm thiểu đi việc trùng lặp code xử lí lỗi trong project. Component này chịu trách nhiệm cho việc **giúp cho lỗi bắt được trở nên dễ hiểu hơn** ví dụ như:
 
