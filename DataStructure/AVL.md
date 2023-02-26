@@ -4,7 +4,7 @@ Bài viết được dịch từ [nguồn](https://www.growingwiththeweb.com/dat
 
 AVL Tree (Cây AVL) là cấu trúc dữ liệu tương tự như cây đỏ đen tự cân bằng - [self-balancing red-black tree](https://www.growingwiththeweb.com/data-structures/red-black-tree/overview/) nhưng thay vì sử dụng "màu" cho BST để có thể đảm bảo sự cân bằng của BST thì AVL sẽ theo dõi độ cao của cây để đảm bảo tính cân bằng cho cây
 
-## Độ phức tạp:
+## Độ phức tạp
 
 **Delete**: xoá một node với key cho trước, độ phức tạp là `O(logn)`.
 **Insert**: thêm một node với key, độ phức tạp là `O(logn)`.
