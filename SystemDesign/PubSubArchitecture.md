@@ -58,3 +58,42 @@ Hãy thử tưởng tượng, hệ thống của bạn có một tập các serv
 Một lĩnh vực khác mà pub/sub cũng có tính ứng dụng khá cao đó là **Event-driven system**. Trong hệ thống hướng sự kiện - event-driven system, các thành phần của hệ thống có thể subscribe một sự kiện nào đó, khi sự kiện đó xảy ra, chúng sẽ có những xử lí tương ứng phù hợp.
 
 Thế nhưng một trong số những ứng dụng hữu ích nhất của pub/sub đó là trong **hệ thống thời gian thực - real time system**.
+Với pub/sub ta có thể xây dựng được một hệ thống **gần thời gian thực** có khả năng xử lí dữ liệu và response gần như ngay tức thì.
+
+## Triển khai kiến trúc pub/sub
+
+Có rất nhiều công cụ để triển khai kiến trúc pub/sub. Trong phần này, tôi sẽ đi sâu vào một vài công cụ phổ biến nhất để triển khai kiến trúc pub/sub và giúp bạn có thể đưa ra quyết định lựa chọn công cụ thích hợp cho mình.
+
+Đầu tiên chúng ta có `Apache Kafka`, đây là công cụ phổ biến trong những năm gần đây với khả năng mở rộng cao cũng như có thể xử lí một số lượng lớn dữ liệu trong thời gian thực. Hơn nữa nó cũng được "thực chiến" bởi các công ty lớn như Uber hay Netflix.
+
+Tiếp theo chúng ta có `RabbitMQ`. Open-source message broker này được xây dựng trên Advanced Message Queuing Protocol (AMQP). Nó khá phù hợp khi bạn mới triển khai pub/sub architecture vì dễ dàng thiết lập và quản lí.
+
+Cuối cùng chúng ta có `Google Cloud Pub/Sub`, đây là dịch vụ được triển khai bằng Google Cloud, cho phép chúng ta có thể gửi và nhận message giữa các ứng dụng độc lập với nhau. Nó được quản lí bởi Google nên ta không cần phải quan tâm đến infrastructure.
+
+Vậy, dựa theo yêu cầu về tính mở rộng của hệ thống bạn có thể có những sự lựa chọn sau:
+
+- Nếu hệ thống cần xử lí nhiều dữ liệu và nhiều users, hãy lựa chọn `Kafka`.
+- Nếu hệ thống mới chỉ bắt đầu và không có quá nhiều traffic, hãy lựa chọn `RabbitMQ`.
+
+Một yếu tố quan trọng khác cũng cần được cân nhắc ở đây đó là `tính tin cậy`. Bạn cần đảm bảo hệ thống vẫn giữ được messages ngay cả khi nó bị "sập". Về điều này thì Google Cloud là một ứng cử viên sáng giá do hệ thống infra của nó được Google quản lí 100%.
+
+Cuối cùng đó là hiệu năng, nếu bạn cần hệ thống có khả năng xử lí dữ liệu bất kì lúc nào mà không bị "lag", hãy nghĩ đến `Kafka` - vì bản thân `Kafka` được thiết kế để xử lí một lượng lớn dữ liệu trong thời gian thực.
+
+> Tóm lại hãy xem xét đến khả năng mở rộng, tính tin cậy và hiệu năng để có thể đưa ra một sự lựa chọn tốt cho việc triển khai pub/sub của bạn
+
+## Best practices & Challenges
+
+Đầu tiên, hãy nắm rõ yêu cầu hệ thống. Hệ thống có cần xử lí thời gian thực hay không? Có yêu cầu cao về khả năng mở rộng và tính tin cậy hay không? Trả lời được những câu hỏi trên sẽ giúp bạn tìm ra được công cụ phù hợp cho hệ thống của mình.
+
+Tiếp theo hãy chú ý đến `messaging protocol`. Đây chính là ngôn ngữ mà pub/sub system sẽ sử dụng để tương tác. Ví dụ: nếu bạn đang cần xử lí binary data thì protocol như Google Protocol Buffer sẽ hữu ích hơn so với text-based protocol như JSON.
+
+Một điều nữa cần phải lưu ý đó là giữ cho pub/sub system của bạn "tách bạch" nhất có thể. Có nghĩa là các thành phần trong hệ thống của bạn cần phải hoạt động độc lập với nhau để có thể dễ dàng mở rộng và bảo trì. Điều này có thể được thực hiện thông qua `message queues` - hoạt động như một buffer giữa publisher và subscriber.
+
+Giờ hãy nói về một vài vấn đề mà bạn sẽ gặp phải với kiến trúc pub/sub. Một trong những vấn đề lớn nhất đó là `message loss` - có thể message được gửi đi nhưng không ai nhận được, hoặc message được nhận nhưng lại không được xử lí. Để giải quyết điều này ta cần:
+
+- Một hệ thống xử lí lỗi mạnh.
+- Một hệ thống monitoring các message bị mất.
+
+Một vấn đề khác đó là `data-stream với tốc độ cao`. Nhận quá nhiều dữ liệu sẽ làm cho việc xử lí chúng theo đúng thứ tự thời gian nhận được là rất khó. Hãy cân nhắc đến các kĩ thuật như `data buffering` hoặc `data sampling`.
+
+Vấn đề cuối cùng đó chính là `hiệu năng` của hệ thống. Khi hệ thống của bạn được mở rộng thêm thì đồng nghĩa với việc độ phức tạp cũng sẽ tăng lên, điều đó có thể làm cho hiệu năng đi xuống. Hãy liên tục monitoring hệ thống của bạn và có những thay đổi phù hợp nhất có thể.
