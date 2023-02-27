@@ -38,3 +38,23 @@ Tiếp theo hãy cùng nhau nói về `centralized system` và `decentralized sy
 Ngược lại thì `decentralized system` không hề có server hub, mà thay vào đó là sự tương tác `peer-to-peer` giữa các publisher và subscriber với nhau. Việc này giúp hệ thống dễ dàng được mở rộng, song lại rất khó để có thể điều khiển được luồng dữ liệu.
 
 Vậy thì loại kiến trúc nào là sự lựa chọn tốt nhất? Câu trả lời đó là tuỳ theo yêu cầu hệ thống của bạn. Nếu hệ thống của bạn yêu cầu truyền dữ liệu thời gian thực và nhanh thì `push-based system` là một sự lựa chọn thích hợp.
+
+Còn nếu như hệ thống của bạn cần phải có thời gian xử lí message trước khi nhận message tiếp theo thì `pull-based` là một sự lựa chọn phù hợp.
+
+Một hệ thống dễ dàng kiểm soát và quản lí ? `Centralized system` là một sự lựa chọn tốt.
+
+Còn nếu bạn cần một hệ thống có khả năng mở rộng cũng như tính uyển chuyển cao thì `Decentralized system` là thứ mà bạn cần.
+
+> Trên thực tế, không có một sự lựa chọn nào là hoàn hảo cả, quan trọng hơn hết là ta cần hiểu sự khác biệt giữa các hệ thống để từ đó đưa ra sự lựa chọn "phù hợp" nhất.
+
+## Ứng dụng của pub/sub architecture
+
+Trong kiến trúc pub/sub, ta có publisher tạo ra message, subscriber sẽ tiêu thụ message. Điều đặc biệt ở pub/sub architecture đó là việc publisher và subscriber không cần phải biết về sự tồn tại của nhau để có thể tương tác với nhau.
+
+Ứng dụng phổ biến nhất của pub/sub đó là **hệ thống phân tán - distributed system**
+
+Hãy thử tưởng tượng, hệ thống của bạn có một tập các servers, chúng cần phải tương tác qua lại với nhau để thực hiện một tác vụ nào đó. Nếu ứng dụng kiến trúc pub/sub ở đây, ta có thể thấy rằng các servers sẽ vừa đóng vai trò là publisher, vừa đóng vai trò làm subscriber. Điều này giúp ta đơn giản hoá việc tương tác giữa các thành phần trong cùng một hệ thống với nhau, từ đó có thể dễ dàng "loại bỏ" cũng như "thêm mới" servers.
+
+Một lĩnh vực khác mà pub/sub cũng có tính ứng dụng khá cao đó là **Event-driven system**. Trong hệ thống hướng sự kiện - event-driven system, các thành phần của hệ thống có thể subscribe một sự kiện nào đó, khi sự kiện đó xảy ra, chúng sẽ có những xử lí tương ứng phù hợp.
+
+Thế nhưng một trong số những ứng dụng hữu ích nhất của pub/sub đó là trong **hệ thống thời gian thực - real time system**.
