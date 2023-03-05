@@ -1,4 +1,4 @@
-# Làm cách nào để kết hợp DDD, Hexagonal, Onion, Clean, CQRS, ...
+# Làm cách nào để kết hợp DDD, Hexagonal, Onion, Clean, CQRS
 
 Bài viết được dịch từ [nguồn](https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/#domain-layer)
 
