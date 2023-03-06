@@ -39,3 +39,19 @@ Code units kết nối tools với application core được gọi là `adapters
 Adapter **ra lệnh** cho ứng dụng làm một việc gì đó được gọi là **Primary hoặc Driving Adapters** trong khi adapter **được ra lệnh** bởi ứng dụng sẽ được gọi là **Secondary hoặc Driven Adapters**.
 
 ### Ports
+
+Bản thân các Adapters không hề được tạo ra một cách ngẫu nhiên, chúng được tạo ra với mục đích khớp với các đầu vào của Application Core, ở đây là **Port**. Port giống như một **đặc tả** về cách tool sử dụng application core hoặc cách mà application core sử dụng tool.
+
+Trong thực tế thì các Port này sẽ là:
+
+- Interface
+- Tổ hợp các interfaces
+- DTOs
+
+Một điều quan trọng ở đây đó là **Ports (interfaces) thuộc về bên trong business logic** trong khi Adapter sẽ nằm bên ngoài business logic.
+
+### Primary hoặc Driving Adapters
+
+Primary (Driving) Adapter sẽ bao ngoài port và "ra lệnh" cho Application core "làm việc". Adapter sẽ có nhiệm vụ **chuyển hoá tất cả từ delivery mechanism thành method call trong Application Core.**
+
+![030-explicit-architecture-svg](https://user-images.githubusercontent.com/15076665/223136385-c203417b-fe0e-42d6-af2d-b7d955a99e8d.png)
