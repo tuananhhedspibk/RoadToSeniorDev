@@ -55,3 +55,21 @@ Một điều quan trọng ở đây đó là **Ports (interfaces) thuộc về 
 Primary (Driving) Adapter sẽ bao ngoài port và "ra lệnh" cho Application core "làm việc". Adapter sẽ có nhiệm vụ **chuyển hoá tất cả từ delivery mechanism thành method call trong Application Core.**
 
 ![030-explicit-architecture-svg](https://user-images.githubusercontent.com/15076665/223136385-c203417b-fe0e-42d6-af2d-b7d955a99e8d.png)
+
+Hay nói cách khác Driving Adapters là Controllers hoặc Console commands, các Adapters này sẽ inject các objects (là instance của các class implement các port - interface mà controller cần).
+
+Nói một cách cụ thể hơn thì Port ở đây có thể là `Service Interface` hoặc `Repository Interface` mà controller cần tới. Các implementations của Port sau đó sẽ được inject vào controller.
+
+Ngoài ra thì port cũng có thể là `Command Bus Interface` hoặc `Query Bus Interface`.
+
+### Secondary hoặc Driven Adapters
+
+Không giống như Driving Adapter (sẽ wrap lấy ports) thì `Driven Adapter` sẽ **implement port** - interfaces được inject vào Application core
+
+![040-explicit-architecture-svg](https://user-images.githubusercontent.com/15076665/223280997-7084d53c-f739-424a-80aa-fbe26c288a55.png)
+
+Ta lấy ví dụ, giả sử ta có một ứng dụng cần lưu và xoá dữ liệu. Ta sẽ tạo ra một interface đáp ứng các nhu cầu trên với 2 methods là `save` và `delete`. Application khi cần lưu hoặc xoá dữ liệu chỉ cần "yêu cầu" object là instance của class implement interface đó trong constructor của mình.
+
+Giả sử ban đầu, chúng ta sử dụng MySQL để quản lí DB, nhưng sau đó ta lại muốn chuyển sang PostgreSQL hoặc MongoDB, thì khi này ta chỉ cần implement interface ở trên, sửa đổi `Driven Adapter` để nó sử dụng đúng các hàm quy định sẵn của PostgreSQL hay MongoDB, sau đó inject vào constructor của application core là được.
+
+### Inversion of control
