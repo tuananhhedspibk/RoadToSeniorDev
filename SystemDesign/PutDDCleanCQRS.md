@@ -144,3 +144,17 @@ Ngoài ra thì `Domain Service` cũng có thể sử dụng các `Domain service
 #### Domain Model
 
 Nằm sâu ở bên trong trung tâm hệ thống, không phụ thuộc vào bất cứ thứ gì trừ nó - sẽ bao hàm business objects biểu diễn các domain logic, ví dụ tiêu biểu ở đây đó là `Entities`, `Value-Objects`.
+
+Domain model cũng chính là nơi **Domain events** tồn tại, các events này được kích hoạt khi một tập dữ liệu nhất định bị thay đổi. Nói cách khác khi entity thay đổi, Domain Event được kích hoạt và nó quan tâm đến sự thay đổi giá trị của các thuộc tính. Events này sẽ rất có hữu ích đặc biệt là khi được sử dụng trong `Event Sourcing`.
+
+## Components
+
+Ở các phần trên chúng ta đã đề cập đến việc chia tách code dựa theo layers. Nhắc tới việc chia tách code, chúng ta còn có chia tách theo tính năng (Package by feature) hoặc chia tách theo component (Package by component) và chia tách theo layer (Package by layer) như trên.
+
+Những cách phân chia trên được giải thích rất cụ thể trong blog [Package by component and architecturally-aligned testing](http://www.codingthearchitecture.com/2015/03/08/package_by_component_and_architecturally_aligned_testing.html) của tác giả Simon Brown.
+
+![Screen Shot 2023-03-08 at 8 34 23](https://user-images.githubusercontent.com/15076665/223579794-cf827357-7c50-4544-ba24-9a40857f2d08.png)
+
+Cá nhân tôi thì thích "Package by component" hơn, dưới đây là sơ đồ cho cách tiếp cận này được tôi lấy ra từ bài viết của Simon Brown.
+
+![Packaging 4_3](https://user-images.githubusercontent.com/15076665/223580076-9314708a-e7af-4a3c-a064-ca77f68727bd.png)
