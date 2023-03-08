@@ -158,3 +158,40 @@ Những cách phân chia trên được giải thích rất cụ thể trong blo
 Cá nhân tôi thì thích "Package by component" hơn, dưới đây là sơ đồ cho cách tiếp cận này được tôi lấy ra từ bài viết của Simon Brown.
 
 ![Packaging 4_3](https://user-images.githubusercontent.com/15076665/223580076-9314708a-e7af-4a3c-a064-ca77f68727bd.png)
+
+Các đoạn code sẽ chia components theo từng layers một như hình minh hoạ phía trên. Ta thấy rằng, components có thể là  Billing, User, Review hoặc Account nhưng chúng luôn luôn liên quan đến domain. `Bounded context` như `Authorization` hoặc `Authentication` nên được xem như các `external tools` nhằm phục vụ khi chúng ta tạo các adapter và ẩn chúng phía sau các port.
+
+![080-explicit-architecture-svg](https://user-images.githubusercontent.com/15076665/223730032-40dc4ce5-c3a0-4f07-8557-2232fbfc2036.png)
+
+### Decoupling các components
+
+Cũng tương tự như việc chia nhỏ code thành các đơn vị như (classes, interfaces, mixins, ...), thì việc giảm sự phụ thuộc lẫn nhau giữa các components cũng sẽ đem lại cho ta những lợi ích đáng kể.
+
+Để chia tách các classes với nhau, ta có thể sử dụng `Dependencies Inject` - bằng cách inject các dependencies vào class thay vì thực thể hoá nó, làm class phụ thuộc vào sự trừu tượng (abstractions - interface hoặc abstract classes) thay vì các classes cụ thể. Do đó class tiến hành inject dependencies không hề biết gì về class triển khai (implement) interface hoặc abstract class đó cả.
+
+Cũng tương tự như vậy, việc chia tách các components cũng sẽ làm cho các components này không hề biết gì về nhau. Điều đó cũng đồng nghĩa rằng Dependency Injection và Dependency Inversion không đủ để chia tách các components do đó ta cần cấu trúc lại kiến trúc. Chúng ta có thể cần đến shared kernel, eventual consistency và thậm chỉ cả discovery service.
+
+![100 - Explicit Architecture](https://user-images.githubusercontent.com/15076665/223735538-7f32bc39-4083-40ed-ab96-23dc0e5212e9.png)
+
+### Trigger logic trong các components khác
+
+Khi một component của chúng ta (component B) cần thực hiện một tác vụ nếu một sự kiện nào đó xảy ra ở trong component A, chúng ta không thể tiến hành gọi trực tiếp từ component B sang component A vì khi đó hai components này sẽ phụ thuộc lẫn nhau.
+
+Thế nhưng chúng ta cũng có thể tiến hành cho component A dispatch ra một event nào đó và event listener bên trong component B sẽ lắng nghe event trên, khi nhận được event, nó sẽ tiến hành trigger các logic cần phải được thực hiện bên trong component B. Điều đó đồng nghĩa với việc component A sẽ phụ thuộc vào `event dispatcher` nhưng lại **tách biệt hoàn toàn** so với component B.
+
+Ngoài ra, nếu bản thân event "tồn tại" trong A thì điều này có nghĩa rằng B sẽ biết về sự tồn tại của A nên nó sẽ phụ thuộc vào A. Để loại bỏ đi sự phụ thuộc này, chúng ta sẽ tạo ra một library với một tập các `application core functionality` sẽ được shared giữa các components - ta gọi đó là `Shared Kernel`. Điều này có nghĩa rằng các components sẽ phụ thuộc vào `Shared Kernel` nhưng lại "đứng độc lập" với nhau.
+
+`Shared Kernel` sẽ bao gồm các tính năng như:
+
+- Application events
+- Domain events
+
+Tuy nhiên chúng ta nên giữ cho `Shared Kernel` này "nhỏ" và "nhẹ" nhất có thể vì dù là bất kì sự thay đổi nào ở shared kernel này cũng sẽ làm ảnh hưởng đến toàn bộ các components phụ thuộc vào nó. Giả sử ta có một hệ thống đa ngôn ngữ, một hệ sinh thái micro-services đi chẳng hạn, mỗi một service sẽ được viết bằng một ngôn ngữ khác nhau, do đó shared kernel cần phải được viết bằng một thứ ngôn ngữ mà các services đều có thể hiểu được. Ta lấy ví dụ với `Event class`, nó sẽ chứa các thuộc tính như:
+
+- Event name
+- Event description
+- ...
+
+được viết bằng `JSON`, chính vì lí do đó nó có thể được đọc và thông dịch bởi các ngôn ngữ khác nhau của các services. Bạn có thể đọc thêm trong bài viết sau đây của tôi: [Hơn cả concentric layers](https://herbertograca.com/2018/07/07/more-than-concentric-layers/)
+
+![explicti_arch_layers](https://user-images.githubusercontent.com/15076665/223738656-3d040c59-19c4-45d0-83cf-3e3188978328.png)
