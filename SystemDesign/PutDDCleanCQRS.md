@@ -195,3 +195,24 @@ Tuy nhiên chúng ta nên giữ cho `Shared Kernel` này "nhỏ" và "nhẹ" nh�
 được viết bằng `JSON`, chính vì lí do đó nó có thể được đọc và thông dịch bởi các ngôn ngữ khác nhau của các services. Bạn có thể đọc thêm trong bài viết sau đây của tôi: [Hơn cả concentric layers](https://herbertograca.com/2018/07/07/more-than-concentric-layers/)
 
 ![explicti_arch_layers](https://user-images.githubusercontent.com/15076665/223738656-3d040c59-19c4-45d0-83cf-3e3188978328.png)
+
+Cách tiếp cận này hoạt động tốt với cả monolithic app và distributed app như micro-services ecosystem. Do event sẽ được phát sinh một cách bất đồng bộ nên việc trigger các logic nằm ở các components khác ngay lập tức là điều không thể.
+
+Việc component A thực hiện lời gọi HTTP tới component B một cách trực tiếp sẽ làm cho 2 components này phụ thuộc lẫn nhau, do đó để làm cho chúng tách bạch, không liên quan gì đến nhau, ta có thể sử dụng `discovery service` - component A sẽ phải "hỏi" discovery service để biết được địa chỉ đích để gửi request đến đó, ngoài ra `discovery service` cũng có thể proxy các requests tới các services liên quan và sau cùng trả về các response tới requester.
+
+Cách tiếp cận nêu trên có thể sẽ khiến cho các components phụ thuộc vào `discovery service` nhưng nó sẽ giúp cho các components không bị lệ thuộc vào nhau.
+
+### Lấy dữ liệu từ các components khác
+
+Như chúng ta đã thấy, việc một component thay đổi dữ liệu của component khác là điều không được phép. Thế nhưng việc component query và sử dụng dữ liệu từ một component khác là điều hoàn toàn có thể.
+
+#### Data Storage share giữa các components
+
+Ta lấy ví dụ `billing component` cần biết tên của client thuộc về `account component`, lúc này `billing component` cần gửi truy vấn dữ liệu đến `shared data storage` để lấy về dữ liệu mà nó cần. `Shared data storage` là tập hợp của nhiều dữ liệu khác nhau, thế nhưng các component khi sử dụng các dữ liệu này thì chỉ có thể sử dụng ở chế độ `read-only` mà thôi (nghĩa là sử dụng thông qua query).
+
+#### Data Storage tách biệt theo từng component
+
+Trong trường hợp này, mỗi component sẽ có riêng cho mình một storage riêng, mỗi storage sẽ bao gồm:
+
+- Một tập dữ liệu thuộc về sở hữu của component và chỉ được chỉnh sửa bởi chính component đó.
+- Một tập dữ liệu khác là bản sao dữ liệu của các components khác, component sở hữu tập này chỉ được phép query cho chức năng của mình chứ không được phép chỉnh sửa gì cả, nó cần được cập nhật khi component "chủ" thay đổi các dữ liệu sao này.
