@@ -245,3 +245,21 @@ Ngoài ra sau khi thực thiện xong use case logic, Application service có th
 ![4_3 UMLish_2](https://user-images.githubusercontent.com/15076665/224055490-1ea5c1e8-0e7d-4f94-b970-64eca4b827f1.png)
 
 Lúc này controller sẽ phụ thuộc vào command và query. Command và query sẽ được khởi tạo và truyền vào Bus - Bus sẽ có nhiệm vụ tìm handler phù hợp đển xử lí các commands.
+
+## Tổng kết
+
+Mục tiêu cuối cùng của chúng ta vẫn là tạo ra một codebase có tính phụ thuộc thấp để có thể dễ dàng thay đổi, mở rộng.
+
+Tất cả các thông tin phía trên chỉ mang tính chất khái niệm, tuy nhiên nếu hiểu được tất cả các khái niệm đó, chúng ta có thể xây dựng được một kiến trúc và một hệ thống "khoẻ mạnh".
+
+Thế nhưng **phát triển ứng dụng là một lĩnh vực có tính thực tế cao, tuỳ vào từng trường hợp, chúng ta sẽ áp dụng những kiến thức của mình sao cho linh hoạt nhất, đó mới chính là những yếu tố cấu thành nên kiến trúc hệ thống**.
+
+**Chúng ta cần hiểu các patterns thế nhưng chúng ta cũng cần phải nghĩ và thực sự hiểu rằng ứng dụng của chúng ta cần gì, và liệu rằng chúng ta có thể đi bao xa trong công cuộc chia tách các components**.
+
+Quyết định này sẽ phụ thuộc vào rất nhiều yếu tố có thể là yêu cầu về chức năng của hệ thống cũng có thể là vòng đời của sản phẩm cũng như trình độ của team dev, ...
+
+Trên đây là tất cả những gì tôi đã hệ thống hoá được.
+
+Ngoài ra tôi cũng mở rộng thêm một vài ý tưởng ở bài viết [Hơn cả concentric layers](https://herbertograca.com/2018/07/07/more-than-concentric-layers/)
+
+Vậy làm thế nào để có thể thực hiện được những yêu cầu trên cho code base của bạn ? Đó chính là chỉ đề trong bài viết tiếp theo của tôi: làm cách nào để áp dụng kiến trúc và domain vào code.
