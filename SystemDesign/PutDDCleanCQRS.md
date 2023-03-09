@@ -216,3 +216,32 @@ Trong trường hợp này, mỗi component sẽ có riêng cho mình một stor
 
 - Một tập dữ liệu thuộc về sở hữu của component và chỉ được chỉnh sửa bởi chính component đó.
 - Một tập dữ liệu khác là bản sao dữ liệu của các components khác, component sở hữu tập này chỉ được phép query cho chức năng của mình chứ không được phép chỉnh sửa gì cả, nó cần được cập nhật khi component "chủ" thay đổi các dữ liệu sao này.
+
+Mỗi component sẽ tạo ra cho mình một bản sao dữ liệu (dạng local) được sao chép từ các components khác. Khi các components khác thay đổi dữ liệu, bản thân component đó sẽ trigger một event, các components khác đang chứa bản sao dữ liệu sẽ lắng nghe event này (domain event) và cập nhật dữ liệu local của chúng.
+
+## Flow of control
+
+Như đã trình bày ở trên, flow của chúng ta sẽ là user → application core → user. Thế nhưng làm cách nào để các classes có thể "hoà nhịp" cùng với nhau ? Cái nào phụ thuộc vào cái nào ? Và làm thế nào để kết hợp chúng lại ?
+
+### Khi không có Command/Query Bus
+
+Trong trường hợp ta không sử dụng command bus, thì controller sẽ phụ thuộc hoặc là vào Application Service hoặc là Query Object.
+
+![4_3 UMLish_1](https://user-images.githubusercontent.com/15076665/224045094-ef183984-b81b-433c-aa06-b711835e9330.png)
+
+`Query Object` sẽ trả về các raw data cho phía user. Dữ liệu trả về dưới dạng DTO - sẽ được inject vào `ViewModel` - ViewModel có thể có một vài view logic bên trong nó.
+
+`Appliation Service` - sẽ chứa các usecase logic, các logic này thường sẽ tiến hành chỉnh sửa dữ liệu thay vì chỉ view dữ liệu thuần tuý. Application Service sẽ phụ thuộc vào Repositories - trả về các entites bao gồm các logic cần được trigger. Ngoài ra nó cũng có thể phụ thuộc vào `Domain Service` - điều phối các domain process giữa các entities với nhau.
+
+Ngoài ra sau khi thực thiện xong use case logic, Application service có thể sẽ thông báo cho toàn hệ thống biết nên do đó application service có thể sẽ phụ thuộc cả vào `dispatcher` để có thể trigger event.
+
+Ở hình trên chúng ta sử dụng interface cho các persistence engine và các các repositories. Chúng có các mục đích như sau:
+
+- Persistance interface là abstraction layer phía trên ORM để từ đó ta có thể dễ dàng thay đổi ORM mà không làm ảnh hưởng đến Application Core.
+- Repository interface là abstraction của persistence engine. Giả sử ta muốn chuyển từ MySQL sang MongoDB. Persistence interface sẽ không thay đổi mà chỉ có class implement nó thay đổi mà thôi. Do đó dù là MySQL hay MongoDB, chỉ cần đáp ứng được mechanism của interface là được.
+
+### Khi có Command/Query Bus
+
+![4_3 UMLish_2](https://user-images.githubusercontent.com/15076665/224055490-1ea5c1e8-0e7d-4f94-b970-64eca4b827f1.png)
+
+Lúc này controller sẽ phụ thuộc vào command và query. Command và query sẽ được khởi tạo và truyền vào Bus - Bus sẽ có nhiệm vụ tìm handler phù hợp đển xử lí các commands.
