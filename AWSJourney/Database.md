@@ -54,6 +54,12 @@ NoSQL DB. Store on SSD storage.
 
 > one second rule: nếu cần đọc dữ liệu được cập nhật trong vòng <= 1s thì hãy sử dụng Strongly consistent, nếu không cần đọc dữ liệu cập nhật trong vòng 1s hãy sử dụng Eventual Consistent
 
+### Key & Secondary index
+
+![Screenshot 2023-03-29 at 9 57 44](https://user-images.githubusercontent.com/15076665/228399501-2c293efe-15e1-40db-92f3-20d1c49f8be4.png)
+
+https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html
+
 ### DyanmoDB Accelerator (DAX)
 
 - In-memory cache
