@@ -56,7 +56,7 @@ NoSQL DB. Store on SSD storage.
 
 ### Key & Secondary index
 
-![Screenshot 2023-03-29 at 9 57 44](https://user-images.githubusercontent.com/15076665/228399501-2c293efe-15e1-40db-92f3-20d1c49f8be4.png)
+![Screenshot 2023-03-30 at 9 33 43](https://user-images.githubusercontent.com/15076665/228698172-a942bef5-4480-41ad-90fc-43f53861bf3b.png)
 
 https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html
 
