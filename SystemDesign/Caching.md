@@ -55,6 +55,7 @@ Do bộ nhớ của cache là hữu hạn nên để giải quyết vấn đề 
 
 Ta sẽ tiến hành cập nhật dữ liệu mới nhất cho cache hoặc nếu không, request sẽ được gửi tới server, server sẽ quét dữ liệu trong DB và làm tăng độ trễ cho response trả về
 
+![Screenshot 2023-03-31 at 10 47 03](https://user-images.githubusercontent.com/15076665/229002152-bef92a5c-b3ac-4eae-ba29-123b1b8f3185.png)
 
 
 
