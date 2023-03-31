@@ -57,6 +57,40 @@ Ta sẽ tiến hành cập nhật dữ liệu mới nhất cho cache hoặc nế
 
 ![Screenshot 2023-03-31 at 10 47 03](https://user-images.githubusercontent.com/15076665/229002152-bef92a5c-b3ac-4eae-ba29-123b1b8f3185.png)
 
+### Write-through cache
+
+Với cách làm này ta sẽ trả về response cho phía client sau khi dữ liệu được ghi lên:
+
+- Cache
+- DB
+
+điều này sẽ giúp giảm nguy cơ bị mất dữ liệu do dữ liệu luôn được lưu ở cache và DB cũng như tính thống nhất về dữ liệu luôn được đảm bảo, thế nhưng nhược điểm của nó chính là việc ghi lên cả cache và DB sẽ làm tốn nhiều thời gian chờ của phía client.
+
+### Write-back cache
+
+Sự khác biệt của giải pháp này là ở chỗ, sau khi ghi vào cache thì thông báo ghi dữ liệu thành công sẽ được trả về luôn cho phía client, sau một khoảng thời gian nhất định thì dữ liệu mới được ghi vào DB.
+
+Cách làm này sẽ phù hợp với các ứng dụng "ghi nhiều" vì nó sẽ làm giảm đáng kể latency. Thế nhưng nguy cơ mất dữ liệu sẽ cao hơn nếu cache bị crash. 
+
+## Cache aside
+
+Tư tưởng chính ở đây đó là làm giảm lượng request đến DB nhiều nhất có thể. Khi cache hit, dữ liệu sẽ được gửi về từ cache, nếu cache miss thì dữ liệu sẽ được lấy ra từ DB, đưa vào cache rồi trả về cho client. Do đó dữ liệu bị cache miss lần này sẽ có sẵn luôn trong cache ở lần sau.
+
+Cách tiếp cận này phù hợp cho các ứng dụng "đọc nhiều", dữ liệu trong hệ thống không được thường xuyên cập nhật
+
+Thế nhưng một vấn đề của cách tiếp cận này đó là dữ liệu trong cache và trong DB có thể không thống nhất với nhau, để tránh điều này xảy ra ta cần thiết lập TTL cho dữ liệu trong cache để sau một khoảng thời gian nhất định, dữ liệu trong cache sẽ được invalidated.
+
+## Read-through cache
+
+
+
+
+
+
+
+
+
+
 
 
 
