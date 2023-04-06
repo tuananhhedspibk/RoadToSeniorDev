@@ -85,3 +85,5 @@ Hãy nhớ:
 > Truyền callback như một tham số cuối của host function, callback phải luôn luôn nhận tham số đầu tiên là một object lỗi
 
 ## Javascript hiện đại thay thế callbacks
+
+JS hiện đại có thêm promise như một công cụ thay thế cho callback
