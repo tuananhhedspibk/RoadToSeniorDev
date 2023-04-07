@@ -196,3 +196,44 @@ withLog.on('end', () => console.log('Done with execute'));
 
 withLog.execute() => console.log('*** Executing task ***'));
 ```
+
+Ở đây `WithLog` là một event emitter. Trong đó ta định nghĩa một instance function là `execute`, hàm này nhận đầu vào là một task function (dưới dạng tham số), nó được wrap bởi các log statements. Trước và sau khi thực hiện task function ta đều emit một event.
+
+Tương ứng với các events đã emit như đã nói ở trên, ta cũng tiến hành đăng kí các listeners tương ứng với các events đó.
+
+Kết quả đầu ra thu được sẽ như sau:
+
+```txt
+Before executing
+About to execute
+*** Executing task ***
+Done with execute
+After executing
+```
+
+Ta thấy rằng toàn bộ đầu ra ở trên đều được thực thi một các đồng bộ (synchronous). Đó là bởi vì tham số task function ở đây là synchronous function, nếu ta truyền vào đó một asynchronous function thì kết quả sẽ khác. Ta có thể mô phỏng bằng việc sử dụng hàm `setImmediate` như sau:
+
+```JS
+// ...
+withLog.execute(() => {
+  setImmediate(() => {
+    console.log('*** Executing task ***');
+  });
+});
+```
+
+Kết quả đầu ra thu được sẽ như sau:
+
+```txt
+Before executing
+About to execute
+Done with execute
+After executing
+*** Executing task ***
+```
+
+Thứ tự này là sai, vậy ở đây ta cần phải emit event ngay sau khi một asynchronous function được thực thi xong, để làm được điều này ta sẽ tiến hành kết hợp giữa callback (hoặc promise) với event-based communication.
+
+Một lợi ích của việc sử dụng event ở đây đó là với cùng một signal ta có thể "reaction" lại nhiều lần bằng việc đăng kí nhiều listener functions tương ứng với event đó. Trong khi đó với callback ta cần phải thêm nhiều logic vào một hàm callback duy nhất. Event cho phép ta có thể sử dụng nhiều external plugins để build các tính năng trên nền application core.
+
+### Asynchronous Events
