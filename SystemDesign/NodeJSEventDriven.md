@@ -237,3 +237,215 @@ Thứ tự này là sai, vậy ở đây ta cần phải emit event ngay sau khi
 Một lợi ích của việc sử dụng event ở đây đó là với cùng một signal ta có thể "reaction" lại nhiều lần bằng việc đăng kí nhiều listener functions tương ứng với event đó. Trong khi đó với callback ta cần phải thêm nhiều logic vào một hàm callback duy nhất. Event cho phép ta có thể sử dụng nhiều external plugins để build các tính năng trên nền application core.
 
 ### Asynchronous Events
+
+Ta cùng xét một ví dụ khác về asynchronous.
+
+```JS
+const fs = require('fs');
+const EventEmitter = require('events');
+
+class WithTime extends EventEmitter {
+  execute(asyncFunc, ...args) {
+    this.emit('begin');
+    console.time('execute');
+    asyncFunc(...args, (err, data) => {
+      if (err) {
+        return this.emit('error', err);
+      }
+
+      this.emit('data', data);
+      console.timeEnd('execute');
+      this.emit('end');
+    });
+  }
+}
+
+const withTime = new WithTime();
+
+withTime.on('begin', () => console.log('About to execute'));
+withTime.on('end', () => console.log('Done with execute'));
+
+withTime.execute(fs.readFile, __filename);
+```
+
+Ở ví dụ trên, `WithTime` sẽ thực thi `asyncFunc` và đưa ra thời gian thực thi hàm đo với việc sử dụng `console.time` & `console.timeEnd`. Nó emit các events theo đúng thứ tự trước và sau khi thực thi.
+
+Ở trên ta truyền vào hàm `fs.readFile`, đây là một hàm async, thay vì phải sử dụng callback để bắt được dữ liệu trả về của hàm này, ta có thể lắng nghe "sự kiện" data để có thể truy xuất được giá trị trả về của hàm.
+
+Thực thi đoạn code trên, ta có kết quả đúng như mong đợi (theo đúng thứ tự)
+
+```txt
+About to execute
+execute: 1.815ms
+Done with execute
+```
+
+Nếu hàm async hỗ trợ Promise, ta có thể viết lại hàm như sau:
+
+```JS
+class WithTime extends EventEmitter {
+  async execute(asyncFunc, ...args) {
+    this.emit('begin');
+    try {
+      console.time('execute');
+      const data = await asyncFunc(...args);
+      this.emit('data', data);
+      console.timeEnd('execute');
+      this.emit('end');
+    } catch (err) {
+      this.emit('error', err);
+    }
+  }
+}
+```
+
+### Events Arguments & Errors
+
+Ở ví dụ phía trên, ta thấy có 2 events được emit đi kèm với các tham số khác.
+
+Error event được emit với error object.
+
+```JS
+this.emit('error', err);
+```
+
+Data event được emit với data object.
+
+```JS
+this.emit('data', data);
+```
+
+Ta có thể sử dụng bao nhiêu tham số tuỳ thích ở phía sau `named event`, các tham số nay sẽ xuất hiện trong hàm listener mà chúng ta đã đăng kí tương ứng với `named event`.
+
+```JS
+withTime.on('data', (data) => {
+  // do something with data
+});
+```
+
+Ví dụ: với data event như ở trên, hàm listener sẽ nhận dữ liệu trả về của hàm `fs.readFile` như là một tham số đầu vào của nó.s
+
+`Error event` là một trường hợp đặc biệt. Ở ví dụ về callback-based, nếu chúng ta không xử lí error event bằng một listener, node process sẽ tự động kết thúc (exit).
+
+Để minh hoạ, ta sẽ tạo một lời gọi hàm thực thi khác với "argument tồi" như sau:
+
+```JS
+class WithTime extends EventEmitter {
+  execute(asyncFunc, ...args) {
+    console.time('execute');
+    asyncFunc(...args, (err, data) => {
+      if (err) {
+        return this.emit('error', err); // Not Handled
+      }
+
+      console.timeEnd('execute');
+    });
+  }
+}
+
+const withTime = new WithTime();
+
+withTime.execute(fs.readFile, ''); // BAD CALL
+withTime.execute(fs.readFile, __filename);
+```
+
+Đoạn code trên sẽ đưa ra lỗi. Node process sẽ crash và tự động kết thúc
+
+```txt
+events.js:292
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: ENOENT: no such file or directory, open ''
+```
+
+Nếu chúng ta đăng kí một listener tương ứng với error event, thì kết quả của node process sẽ thay đổi. VD:
+
+```JS
+withTime.on('error', (err) => {
+  // do something with err, for example log it somewhere
+  console.log(err)
+});
+```
+
+Nếu chúng ta làm như trên, thì node process không bị crash và tự động thoát, đồng thời các xử lí phía sau đó vẫn tiếp tục được thực thi.
+
+```txt
+[Error: ENOENT: no such file or directory, open ''] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: ''
+}
+execute: 14.549ms
+```
+
+Một cách khác để xử lí các execeptions từ emitted errors đó chính là đăng kí một listener với global `uncaughtException` process event. Nhưng trên thực tế, catching error thông qua một global process là một ý tưởng tồi. Lời khuyên với `uncaughtException` đó là tránh dùng nó tối đa có thể, thế nhưng trong truòng hợp bất khả kháng (report về những gì đã xảy ra hoặc thực thi cleaup), chúng ta nên exit process bằng mọi cách.
+
+```JS
+process.on('uncaughtException', (err) => {
+  // something went unhandled.
+  // Do any cleanup and exit anyway!
+
+  console.error(err); // don't do just that.
+
+  // FORCE exit the process too.
+  process.exit(1);
+});
+```
+
+Hãy thử tưởng tượng, nhiều error events xảy ra cùng một lúc, điều này cũng có nghĩa rằng `uncaughtException` listener ở phía trên sẽ được chạy nhiều lần, dẫn đến vấn đề về cleaup.
+
+`EventEmitter` module có đưa ra một method đó là method `once`, method này sẽ chỉ ra rằng, listener tương ứng với nó sẽ chỉ được chạy duy nhất một lần mà thôi. Đây là một cách sử dụng phổ biến với `uncaughtException` vì khi `uncaughtException` xảy ra lần đầu tiên ta sẽ tiến hành cleanup và thoát khỏi tiến trình luôn.
+
+### Thứ tự của các listeners
+
+Nếu chúng ta đăng kí nhiều listeners tương ứng với cùng một event, thì thứ tự thực hiện của các listeners sẽ giống với thứ tự được đăng kí của chúng.
+
+```JS
+withTime.on('data', (data) => {
+  console.log(`Length: ${data.length}`);
+});
+
+withTime.on('data', (data) => {
+  console.log(`Characters: ${data.toString().length}`);
+});
+
+withTime.execute(fs.readFile, __filename);
+```
+
+Kết quả thu được sẽ như sau:
+
+```txt
+Length: 1364
+Characters: 1364
+execute: 8.003ms
+```
+
+Đúng theo như thứ tự được đăng kí của các listeners ("Length" trước, "Characters" sau).
+
+Thế nhưng nếu ta muốn, listener đăng kí sau được thực thi trước thì ta có thể sử dụng hàm `prependListener` như sau:
+
+```JS
+withTime.on('data', (data) => {
+  console.log(`Length: ${data.length}`);
+});
+
+withTime.prependListener('data', (data) => {
+  console.log(`Characters: ${data.toString().length}`);
+});
+```
+
+Kết quả thu được sẽ như sau:
+
+```txt
+Characters: 1377
+Length: 1377
+execute: 8.985ms
+```
+
+"Characters" sẽ được thực thi trước "Lengths" do nó được đăng kí bằng `prependListener` function.
+
+Cuối cùng để loại bỏ đi listener, ta có hàm `removeListener`.
+
+Và đó là tất cả những gì tôi muốn trình bày với các bạn trong bài viết lần này, hẹn gặp lại ở các bài viết tiếp theo.
