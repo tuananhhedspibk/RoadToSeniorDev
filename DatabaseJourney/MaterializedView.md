@@ -31,3 +31,7 @@ Và đây chính là lúc chúng ta vận dụng Materialized view.
 Materialized views sẽ tạo ra một pre-aggregated, read-optimized version cho source data nhằm mục đích giảm tải cho câu query mà ta cần chạy.
 
 Ngay khi định nghĩa Materialized views xong, câu query sẽ được chạy và kết quả của nó sẽ được lên đĩa theo form của một table thông thường.
+
+Khi tạo một materialized view, dữ liệu sẽ được truy xuất từ view thay vì thực thi lại câu query do bản thân câu query đã được thực thi trước đó. Điều này cực kì hữu ích, đặc biệt là khi câu việc chạy query tốn nhiều tài nguyên và chi phí.
+
+## Làm cách nào để build một Materialized Views ?
