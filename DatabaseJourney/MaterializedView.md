@@ -83,3 +83,22 @@ Giả sử ta thực hiện `SELECT * FROM vip_customers`, query planner sẽ vi
 <img width="714" alt="Screenshot 2023-04-15 at 16 01 47" src="https://user-images.githubusercontent.com/15076665/232194073-a6f30cf0-e85c-4b6e-98a1-241ac85b7d28.png">
 
 ## Giữ cho view đồng bộ với source tables
+
+Khi có dữ liệu mới được thêm vào bảng, làm cách nào để ta có thể đưa những dữ liệu mới này vào view. Về cơ bản ta có 2 cách đó là:
+
+- **Full rebuild** materialized view.
+- **Incremental refresh** materialized view.
+
+### Full rebuild
+
+Ở đây ta sẽ chạy lại câu query gắn với materialized view, do quá trình này rất tốn kém (nguyên nhân là bởi sẽ phải join lại các bảng và chạy lại các hàm thống kê) nên ta chỉ nên thực thi full rebuild materialized view theo từng khoảng thời gian nhất định để tránh ảnh hưởng đến hiệu năng của DB.
+
+### Incremental refreshes
+
+Ngược lại với full rebuild, phương pháp này sẽ tiến hành "merge" các delta data với materialized view hiện thời, phương pháp này nhanh và ít tốn kém hơn so với full rebuilds.
+
+<img width="780" alt="Screenshot 2023-04-15 at 16 18 48" src="https://user-images.githubusercontent.com/15076665/232194885-57be4ee4-ab4b-4abf-a7f9-5e8858085479.png">
+
+## Những vấn dề gặp phải khi sử dụng materialized views
+
+Quay trở lại với ví dụ về twitter timeline, ta thấy rằng việc sử dụng materialized view cho user timeline data sẽ giúp ích rất nhiều về mặt hiệu năng của hệ thống. Khi ta chỉ cần lấy ra dữ liệu đã được lưu sẵn trong materialized view và trả về cho UI là xong.
