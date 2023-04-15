@@ -35,3 +35,51 @@ Ngay khi định nghĩa Materialized views xong, câu query sẽ được chạy
 Khi tạo một materialized view, dữ liệu sẽ được truy xuất từ view thay vì thực thi lại câu query do bản thân câu query đã được thực thi trước đó. Điều này cực kì hữu ích, đặc biệt là khi câu việc chạy query tốn nhiều tài nguyên và chi phí.
 
 ## Làm cách nào để build một Materialized Views ?
+
+Ta có thể định nghĩa một Materialized view thông qua câu `SELECT` như sau:
+
+```SQL
+SELECT MATERIALIZED VIEW timeline AS
+SELECT user_id, display_name, avatar_url
+FROM foo
+JOIN bar ON ...
+```
+
+Materialized views là một read-optimized, denormalized structure. Do đó câu SELECT cấu thành nên view sẽ bao gồm:
+
+- Phép `JOIN`
+- Các hàm thống kê như `sum()`, `avg()`, `count()`
+
+Khi tạo một materialized view, DB sẽ làm những công việc như sau:
+
+- Scan toàn bộ các bảng liên quan để lấy ra consistent snapshot
+- Chạy các hàm thống kê (aggregate)
+- Chạy câu SELECT trên dữ liệu
+- Copy kết quả thu được lên một bảng tạm nằm ở ổ đĩa
+
+<img width="511" alt="Screenshot 2023-04-15 at 15 53 48" src="https://user-images.githubusercontent.com/15076665/232193696-40b850c8-2b57-4942-9df1-3c2ca7523e50.png">
+
+Build materialized view là một quá trình tốn kém chi phí thế nhưng nó giúp tiến kiệm và đảm bảo về hiệu năng ở mỗi lần đọc dữ liệu.
+
+## Materialized views vs tranditional views
+
+Materialized view khác hoàn toàn so với "view" truyền thống.
+
+View truyền thống (non-materialized view)　chỉ đơn thuần là alias của một câu query, khi đọc từ view, DB sẽ chuyển nó thành một câu query và chạy dưới nền của DB. Việc này giúp ta không phải bận tâm đến độ phức tạp của câu query nhưng nó lại không mang lại bất kì một hiệu quả gì về mặt hiệu năng cả.
+
+Lấy ví dụ với câu lệnh tạo view như sau:
+
+```SQL
+CREATE VIEW vip_customers AS
+SELECT customers.id, customers.name, SUM(orders.total) as total_spend
+FROM customers
+JOIN orders ON customers.id = orders.customer_id
+GROUP BY orders.customer_id
+HAVING SUM(orderss.total) > 5000;
+```
+
+Giả sử ta thực hiện `SELECT * FROM vip_customers`, query planner sẽ viết lại câu query vừa rồi dựa theo câu query gốc đã được aliased, do đó cứ mỗi khi ta tiến hành truy xuất vào view thì các phép join cũng như các hàm thống kê lại được thực thi. Ở đây không có bất kì dữ liệu nào được cached lại cả.
+
+<img width="714" alt="Screenshot 2023-04-15 at 16 01 47" src="https://user-images.githubusercontent.com/15076665/232194073-a6f30cf0-e85c-4b6e-98a1-241ac85b7d28.png">
+
+## Giữ cho view đồng bộ với source tables
