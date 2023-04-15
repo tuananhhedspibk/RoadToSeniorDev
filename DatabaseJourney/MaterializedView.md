@@ -102,3 +102,8 @@ Ngược lại với full rebuild, phương pháp này sẽ tiến hành "merge"
 ## Những vấn dề gặp phải khi sử dụng materialized views
 
 Quay trở lại với ví dụ về twitter timeline, ta thấy rằng việc sử dụng materialized view cho user timeline data sẽ giúp ích rất nhiều về mặt hiệu năng của hệ thống. Khi ta chỉ cần lấy ra dữ liệu đã được lưu sẵn trong materialized view và trả về cho UI là xong.
+
+Thế nhưng tron thực tế việc lưu dữ liệu liên quan đến view đòi hỏi phải có những chiến lược cụ thể như:
+
+- Khi nào cập nhật dữ liệu cho view (nếu cập nhật bằng full rebuild sẽ cần phải cân nhắc tới hiệu năng của DB).
+- Cần chọn refresh schedule phù hợp để có sự cân bằng giữa stale data và chi phí của quá trình rebuild.
