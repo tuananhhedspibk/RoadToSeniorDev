@@ -7,3 +7,5 @@ Ta thường sẽ kết hợp sử dụng với NLB. Việc thiết lập privat
 ## HTTP API & ALB
 
 ![1-ALB-Example](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/79828986/d124b017-da4d-4b92-947a-a33dd86531db)
+
+Với private integration, internal LB sẽ route các request dựa theo private IP bên trong private subnet
