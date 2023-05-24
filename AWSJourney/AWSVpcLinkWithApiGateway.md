@@ -2,7 +2,7 @@
 
 Ta thường sử dụng sự kết hợp này khi muốn xây dựng Api Gateway kết nối với các private resource như EC2 hay ECS.
 
-Ta thường sẽ kết hợp sử dụng với NLB. Việc thiết lập private inegration kiểu này sẽ giúp các HTTPs resources bên trong VPC có thể được truy cập từ bên ngoài VPC.ư
+Ta thường sẽ kết hợp sử dụng với NLB. Việc thiết lập private inegration kiểu này sẽ giúp các HTTPs resources bên trong VPC có thể được truy cập từ bên ngoài VPC.
 
 ## HTTP API & ALB
 
