@@ -150,3 +150,147 @@ app.useGlobalFilters(HttpExceptionFilter);
 ```
 
 ## Pipes
+
+Được định nghĩa đi kèm với `@Injectable()`, và implement `PipeTransform` interface. Mục đích chính của việc sử dụng pipe đó là:
+
+- Thay đổi dữ liệu đầu vào (format dữ liệu đầu vào)
+- Validation: nếu dữ liệu không vấn đề gì thì ta sẽ tiến hành xử lí tiếp theo còn nếu không thì sẽ đưa ra ngoại lệ.
+
+Có tất cả 9 loại pipes:
+
+- ValidationPipe
+- ParseIntPipe
+- ParseFloatPipe
+- ParseBoolPipe
+- ParseArrayPipe
+- ParseUUIDPipe
+- ParseEnumPipe
+- DefaultValuePipe
+- ParseFilePipe
+
+Ví dụ:
+
+```ts
+@Injectable() // @Injectable() デコレータの適用
+export class ParseIntPipe implements PipeTransform<string, number> { // PipeTransform インターフェースの実装
+  transform(value: string, metadata: ArgumentMetadata): number {
+    const val = parseInt(value, 10); // データの変換
+    if (isNaN(val)) {
+      throw new BadRequestException('Validation failed'); // Pipe を適用できないケースは例外を送出
+    }
+    return val;
+  }
+}
+```
+
+Pipe được sử dụng ở cả 4 levels: param, method, controller, global.
+
+```ts
+@Get(':id')
+async findOne(@Param('id', ParseIntPipe) id) { // パラメータ id に対する Pipe を登録
+  return this.catsService.findOne(id);
+}
+```
+
+```ts
+@Post()
+@UsePipes(ValidationPipe) // Pipe を登録
+async create(@Body() createCatDto: CreateCatDto) {
+  // ...
+}
+```
+
+```ts
+const app = await NestFactory.create(AppModule);
+app.useGlobalPipes(ValidationPipe);
+```
+
+## Guards
+
+Được định nghĩa với `@Injectable()`, implements `CanActivate` interface
+
+Thường có nhiệm vụ quyết định xem có nên xử lí request không dựa theo (quyền, role, ACL, ...)
+
+```ts
+@Injectable() // @Injectable() デコレータの適用
+export class AuthGuard implements CanActivate { // CanActivate インターフェースの実装
+  canActivate(
+    context: ExecutionContext
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const request = context.switchToHttp().getRequest<Request>();
+    return validateRequest(request); // リクエストに対する何らかの検証 (true であれば次の処理へと進む)
+  }
+}
+```
+
+Guard có thể được sử dụng ở method, controller, global levels.
+
+```ts
+@Post()
+@UseGuards(AuthGuard) // Guard を登録
+async create(@Body() createCatDto: CreateCatDto) {
+  // ...
+}
+```
+
+```ts
+@UseGuards(AuthGuard)
+export class CatsController {}
+```
+
+```ts
+const app = await NestFactory.create(AppModule);
+app.useGlobalGuards(AuthGuard);
+```
+
+## Interceptors
+
+Được định nghĩa với `@Injectable()`, implements `NestInterceptor` interface.
+
+Có thể thực hiện được những điều sau đây:
+
+- Tiền / Hậu xử lí request.
+- Thay đổi giá trị trả về của hàm.
+- Thay đổi ngoại lệ được đưa ra từ hàm.
+- Mở rộng hành vi của hàm
+- Ghi đè hàm
+
+```ts
+@Injectable() // @Injectable() デコレータの適用
+export class LoggingInterceptor implements NestInterceptor { // NestInterceptor  インターフェースの実装
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    console.log('Before...');
+
+    const now = Date.now();
+    return next
+      .handle()
+      .pipe(
+        tap(() => console.log(`After... ${Date.now() - now}ms`)), // レスポンスが返るまでの経過時間を表示
+      );
+  }
+}
+```
+
+Nó được sử dụng ở method, controller, global levels
+
+```ts
+@Post()
+@UseInterceptors(LoggingInterceptor) // Interceptor を登録
+async create(@Body() createCatDto: CreateCatDto) {
+  // ...
+}
+```
+
+```ts
+@UseInterceptors(LoggingInterceptor)
+export class CatsController {}
+```
+
+```ts
+const app = await NestFactory.create(AppModule);
+app.useGlobalInterceptors(LoggingInterceptor);
+```
+
+
+
+
