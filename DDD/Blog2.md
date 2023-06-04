@@ -174,3 +174,63 @@ Cách đặt tên từng tầng có thể có đôi chút khác biệt:
 
 - Usecase Layer → Application layer
 - Adapter Layer → Interface Adapter Layer
+
+## Các khái niệm xoay quanh tầng domain
+
+Ngoài khái niệm về domain aggregate như đã nói ở phần trước, chúng ta còn có các khái niệm khác ở tầng domain như:
+
+- Value-Object
+- Domain Service
+- Repository
+- Factory
+
+### Value Object
+
+Value-Object là một loại giá trị mà nó sẽ không hề có ý nghĩa khi không gắn với bất kì một Aggregate cụ thể nào cả. Ta lấy ví dụ:
+
+Trong công ty, mỗi một nhân viên sẽ có một **mã số nhân viên** của riêng mình (VD: 1234), và mã số này sẽ chỉ gắn với một nhân viên duy nhất mà thôi. Mã số này sẽ được sử dụng để:
+
+- Quản lí tiến độ công việc
+- Quản lí nhân sự
+- ...
+
+nghĩa là con số **1234** này có ý nghĩa rất quan trọng đối với công ty và chính nhân viên đó. Thế nhưng nếu nó không gắn với bất kì một nhân viên nào thì nó chỉ đơn thuần là **một con số** mà thôi, đồng thời nó cũng không biểu đạt một business logic nào cả.
+
+Trong API của mình tôi có định nghĩa một `class EmailValueObject` như sau: <https://github.com/tuananhhedspibk/NewAnigram-BE-DDD-Public/blob/main/src/domain/value-object/email-vo.ts>
+
+Với email thông thường, chỉ cần tuân thủ đúng format **xxx@domain** là đủ, nhưng có thể do đặc thù của hệ thống, bạn có thể thêm những điều kiện khác cho email (VD: phải bắt đầu bằng chữ cái thường, ...), những điều kiện trên chính là các business logic thuộc về tầng domain.
+
+Ở API của mình, tôi quy định email phải tuân thủ theo một format được kiểm tra bởi regex đã định nghĩa sẵn như sau:
+
+```ts
+const mailRegex =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const mailSchema = z.string().regex(mailRegex);
+
+try {
+  mailSchema.parse(input);
+  this.value = input;
+} catch (e) {
+  throw new DomainError({
+    code: DomainErrorCode.BAD_REQUEST,
+    message: 'Invalid email format',
+    info: {
+      detailCode: DomainErrorDetailCode.INVALID_EMAIL_FORMAT,
+    },
+  });
+}
+```
+
+### Domain Service
+
+Dùng khi **việc biểu thị model bằng một object là không thể**. Thông thường sẽ thao tác với **một tập các objects**.
+
+VD: một ví dụ tiêu biểu đó là việc check xem mail có bị trùng lặp hay không - nói cách khác mail đã được sử dụng cho user trong hệ thống hay chưa. Bản thân một user object có thể biết được mail của mình nhưng không thể biết được thông tin về mail của object khác nên việc tự nó kiểm tra là điều không thể.
+
+Những trường hợp như trên thường sẽ được xử lí bởi `domain service`.
+
+Thế nhưng:
+
+> Hãy cố gắng sử dụng entity và value-object nhiều nhất có thể và hạn chế tối đa việc sử dụng domain-service
+
+Lí do là bởi nếu vô tình viết nhiều business logic vào đây thì trong tương lai nó sẽ trở thành một Fat class một cách không mong muốn.
