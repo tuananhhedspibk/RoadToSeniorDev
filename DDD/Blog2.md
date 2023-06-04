@@ -8,9 +8,9 @@ Khi áp dụng tư tưởng của DDD vào thiết kế hệ thống ta thườn
 
 - Kiến trúc 3 tầng (3 layers architecture).
 - Kiến trúc phân tầng (Layered architecture).
+- Kiến trúc "củ hành" (Onion architecture).
 - Kiến trúc Hexagonal (Hexagonal architecture - Port and Adapter architecture).
 - Kiến trúc "sạch" (Clean architecture).
-- Kiến trúc "củ hành" (Onion architecture).
 
 Chúng ta sẽ đi lần lượt các kiểu kiến trúc phía trên một cách tổng quan và tóm lược nhất có thể.
 
@@ -122,3 +122,55 @@ Printer.print(Counter.count);
 Ta thấy rằng việc truyền tham số cho method print của class Printer đã làm giảm đi sự phụ thuộc lẫn nhau của 2 classes Printer và Counter.
 
 ### Kiến trúc phân tầng (Layered architecture)
+
+![Screen Shot 2023-06-04 at 21 30 24](https://github.com/tuananhhedspibk/DDD-Modeling/assets/15076665/d25f6d61-3157-45df-9133-1f156473751b)
+
+Ở kiến trúc này ta sẽ tách tầng `Bussiness Logic Layer` thành 2 tầng:
+
+- `Application Layer` - thực thi usecase
+- `Domain Layer` - thực thi domain logic
+
+Ở kiến trúc này:
+
+- Sự liên kết giữa các tầng đã cao hơn.
+- Sự phụ thuộc giữa các tầng đã giảm đi nhưng **tầng domain vẫn phụ thuộc vào tầng infra** (phụ thuộc vào việc sử dụng DB hay OR Mapper) và đây là điều cần tránh
+
+### Kiến trúc "củ hành" (Onion architecture)
+
+Cũng gần giống với kiến trúc phân tầng ở trên nhưng **sự phụ thuộc của tầng domain vào tầng infra đã bị triệt tiêu hoàn toàn**
+
+![Screen Shot 2023-06-04 at 21 36 34](https://github.com/tuananhhedspibk/DDD-Modeling/assets/15076665/23594212-2b01-46f9-9faa-e4d314f5bdea)
+
+Cụ thể là tầng domain sẽ định nghĩa các `Repository Interface`, tầng infra sẽ "implement" các interfaces nêu trên. Nên lúc này tầng infra sẽ phụ thuộc vào tầng domain. Tầng infra cũng sẽ tiến hành việc lưu `Domain Aggregate` vào trong DB.
+
+Đặc điểm của các tầng còn lại (Presentation, Usecase, Domain) sẽ như sau:
+
+- Tầng domain: cần độc lập, không phụ thuộc vào bất kì tầng nào. Chứa các `Value-Object`, `Domain Aggregate`, `Domain Event`
+- Tầng usecase: sử dụng các public method của các `Domain Aggregate`, tầng này không được phép phụ thuộc vào tầng presentation
+- Tầng presentation: tương tác trực tiếp với client, nó chứa các classes: `Controller`, `External-Controller`
+
+![Onion Architecture](https://github.com/tuananhhedspibk/DDD-Modeling/assets/15076665/abeae8ed-5be8-4acb-8efc-ef4341d76260)
+
+Việc các Actors bên ngoài tới Application cũng như nhận req từ Application đều thông qua các Adapters.
+
+### Kiến trúc Hexagonal (Hexagonal architecture - Port and Adapter architecture)
+
+Tư tưởng chính ở đây đó là Application sẽ tương tác với thế giới bên ngoài thông qua:
+
+- Adapter
+- Port chuyên dụng
+
+Tóm tắt về kiến trúc này sẽ như sau:
+
+![Hexagonal Architecture](https://github.com/tuananhhedspibk/DDD-Modeling/assets/15076665/b260a6c3-bb1f-4692-839d-7ba252b79e70)
+
+### Kiến trúc "sạch" (Clean architecture)
+
+![Clean Architecture](https://user-images.githubusercontent.com/15076665/175429364-68f2d02f-2956-4278-8ea6-c84ae3377139.png)
+
+Kiến trúc này là sự tổng hợp và kế thừa từ `Onion Architecture` và `Hexagonal Architecture`.
+
+Cách đặt tên từng tầng có thể có đôi chút khác biệt:
+
+- Usecase Layer → Application layer
+- Adapter Layer → Interface Adapter Layer
