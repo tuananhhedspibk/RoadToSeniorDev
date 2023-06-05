@@ -234,3 +234,71 @@ Thế nhưng:
 > Hãy cố gắng sử dụng entity và value-object nhiều nhất có thể và hạn chế tối đa việc sử dụng domain-service
 
 Lí do là bởi nếu vô tình viết nhiều business logic vào đây thì trong tương lai nó sẽ trở thành một Fat class một cách không mong muốn.
+
+### Repository
+
+Dùng để lưu dữ liệu của `Aggregate` vào DB. Thông thường 1 aggregate sẽ tương ứng với một Repository.
+
+Việc truyền aggregate vào repository hay trả về aggregate đều phải thông qua `root aggregate`. Ở API của mình, tôi tạo ra `UserRepository` như sau:
+
+Đầu tiên, tôi định nghĩa một `abstract class IUserRepository` ở tầng domain.
+
+```ts
+export abstract class IUserRepository {
+  getByEmail: (
+    transaction: TransactionType | null,
+    email: string,
+  ) => Promise<UserEntity | null>;
+  save: (transaction: TransactionType, user: UserEntity) => Promise<UserEntity>;
+}
+```
+
+Nó định nghĩa 2 method signature là `getByEmail` & `save` với chức năng lần lượt là:
+
+- `getByEmail`: lấy user từ DB thông qua email.
+- `save`: lưu dữ liệu của user vào DB.
+
+Tôi triển khai (implement) abstract class này ở tầng infra như sau:
+
+```ts
+class UserRepository implements IUserRepository {
+  async getByEmail(
+    transaction: Transaction | null,
+    email: string,
+  ): Promise<DomainUserEntity | null> {
+    const repository = transaction
+      ? transaction.getRepository(RDBUserEntity)
+      : getRepository(RDBUserEntity);
+
+    const query = this.getBaseQuery(repository);
+    const user = await query.where('user.email = :email', { email }).getOne();
+
+    return userFactory.createUserEntity(user);
+  }
+
+  async save(
+    transaction: TransactionType,
+    user: DomainUserEntity,
+  ): Promise<DomainUserEntity> {
+    const repository = transaction
+      ? transaction.getRepository(RDBUserEntity)
+      : getRepository(RDBUserEntity);
+
+    const salt = randomlyGenerateSalt();
+    const passwordHashedWithSalt = hashPassword(user.password.toString(), salt);
+
+    const createdUser = await repository.save({
+      email: user.email.toString(),
+      password: passwordHashedWithSalt,
+      userName: user.userName,
+      salt,
+    });
+
+    return userFactory.createUserEntity(createdUser);
+  }
+}
+```
+
+Các bạn có thể tham khảo full source code của `abstract class` tại [đây](https://github.com/tuananhhedspibk/NewAnigram-BE-DDD-Public/blob/main/src/domain/repository/user.ts) và `implement class` tại [đây](https://github.com/tuananhhedspibk/NewAnigram-BE-DDD-Public/blob/main/src/infrastructure/repository/user/index.ts).
+
+Lí do tôi sử dụng abstract class chứ không phải interface ở đây đó là: tôi muốn `IUserRepository` ở tầng domain sẽ giống như một `BaseClass` của domain user để từ đó tôi có thể tạo thêm các `SubBaseClass` của domain user khác như `IAdminRepository` hoặc `IMemberRepository`.
