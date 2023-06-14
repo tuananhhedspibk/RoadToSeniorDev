@@ -302,3 +302,56 @@ class UserRepository implements IUserRepository {
 Các bạn có thể tham khảo full source code của `abstract class` tại [đây](https://github.com/tuananhhedspibk/NewAnigram-BE-DDD-Public/blob/main/src/domain/repository/user.ts) và `implement class` tại [đây](https://github.com/tuananhhedspibk/NewAnigram-BE-DDD-Public/blob/main/src/infrastructure/repository/user/index.ts).
 
 Lí do tôi sử dụng abstract class chứ không phải interface ở đây đó là: tôi muốn `IUserRepository` ở tầng domain sẽ giống như một `BaseClass` của domain user để từ đó tôi có thể tạo thêm các `SubBaseClass` của domain user khác như `IAdminRepository` hoặc `IMemberRepository`.
+
+### Factory
+
+Thường được sử dụng để tạo ra object mới khi logic tạo ra object khá phức tạp. Bản thân factory cũng được coi như một loại `domain service`.
+
+Tôi lấy ví dụ với API do mình phát triển như sau:
+
+```ts
+import { plainToClass, ClassConstructor } from '@nestjs/class-transformer';
+
+export class UserFactory {
+  protected createEntity<E, P>(entity: ClassConstructor<E>, plain: P): E {
+    return plainToClass(entity, plain, {
+      excludeExtraneousValues: true,
+    }) as E;
+  }
+
+  createUserEntity(user: User | null) {
+    // user param has User type (same structure with DB table)
+    if (!user) return null;
+
+    const entity = this.createEntity(UserEntity, {
+      ...user,
+      detail: user.userDetail || null,
+    });
+
+    return entity;
+  }
+}
+```
+
+Ở đây tôi sử dụng method `createUserEntity` để tạo ra các UserEntity dùng cho tầng domain, với tham số đầu vào là `user` có kiểu dữ liệu là `User` - kiểu dữ liệu này có cấu trúc giống hệt `User Model` hay nói cách khác nó chính là dữ liệu mà tôi lấy trực tiếp từ DB ra.
+
+Trong method `createUserEntity` tôi sử dụng hàm `plainToClass` của thư viện `class-transformer` với mục đích "ép" cho `User Model` trở thành `UserEntity` để có đầu ra như ý muốn của mình.
+
+## Kết phần hai
+
+Vậy là trong phần hai này tôi đã trình bày được với bạn đọc các kiểu kiến trúc thường dùng với DDD đó là:
+
+- Kiến trúc 3 tầng (3 layers architecture).
+- Kiến trúc phân tầng (Layered architecture).
+- Kiến trúc "củ hành" (Onion architecture).
+- Kiến trúc Hexagonal (Hexagonal architecture - Port and Adapter architecture).
+- Kiến trúc "sạch" (Clean architecture).
+
+cũng như các khái niệm quan trong khác thường được đề cập đến trong tầng domain của DDD như:
+
+- Value-Object
+- Domain Service
+- Repository
+- Factory
+
+Do hạn chế về mặt kiến thức cũng như phạm vi của blog nên tôi chỉ có thể trình bày với bạn đọc những nội dung mang tính chất tóm lược và quan trọng nhất, hi vọng chúng sẽ ít nhiều hữu ích cho bạn đọc sau này. Xin trân thành cảm ơn bạn đọc và hẹn gặp lại ở phần ba trong series các blog về DDD.
