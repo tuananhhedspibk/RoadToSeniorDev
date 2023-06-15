@@ -157,3 +157,41 @@ return output;
 Với **cách 2** thì ưu cũng như nhược điểm của nó ngược lại hoàn toàn so với **cách 1**.
 
 Nếu thực thi cách thứ 2 thì domain object cần có các **method phục vụ cho việc hiển thị**, từ đó sẽ làm cho domain object bị phình to, khó bảo trì. Vậy nên nếu áp dụng cách 2 thì thay vì tốn công chuyển đổi dữ liệu thì cái giá phải trả cũng lớn không kém.
+
+### Đặt tên cho Return Value Class
+
+Bạn có thể đặt tên theo format **XXXDTO** - DTO là **Data Transfer Object**
+
+![File_000 (2)](https://user-images.githubusercontent.com/15076665/176991118-62750bda-4af4-42a0-850b-54f83435f77a.png)
+
+## Một vài chú ý khác khi triển khai tầng use-case
+
+### Phân chia class ở tầng use-case
+
+Thông thường sẽ là **1 class - 1 public method**, trong API của mình tôi thường cấu trúc cho một use-case class của mình như sau:
+
+```ts
+export default class UpdateUserProfileUsecase {
+  async execute(input) {
+    // ...
+  }
+}
+```
+
+bạn đọc có thể tham khảo thêm [tại đây](https://github.com/tuananhhedspibk/NewAnigram-BE-DDD-Public/blob/main/src/usecase/user/update-profile/index.ts)
+
+### Cách đặt tên cho use-case class
+
+- Với các classes có 1 method duy nhất thì ta **giữ nguyên động từ** - VD: **CreateTaskUseCase**.
+- Với các classes có nhiều methods thì ta **bỏ động từ khỏi tên class** - VD: **TaskUseCase**.
+
+Về cơ bản việc đặt tên cho use-case class sẽ tuỳ vào nội dung cũng như nghiệp vụ của từng project riêng, thế nhưng một trong những điều ta cần phải chú ý ở đây đó là việc nên nghĩ tên cho use-case class ngay từ khâu thiết kế sơ đồ use-case.
+
+## Kết phần 3
+
+Vậy là phần 3 trong series về DDD của tôi đã khép lại, trong phần 3 này tôi đã chia sẻ được với bạn đọc về:
+
+1. Phân chia context.
+2. Kiến trúc của tầng usecase.
+
+Hẹn gặp lại các bạn vào phần 4 của series về DDD, trong phần 4 tôi sẽ nói về việc triển khai tầng presentation và tầng infrastructure, rất mong bạn đọc đón nhận một cách nồng nhiệt.
