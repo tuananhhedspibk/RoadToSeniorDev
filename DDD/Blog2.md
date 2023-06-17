@@ -1,4 +1,4 @@
-# Tôi đã xây dựng một API đơn giản bằng DDD như thế nào ? - Phần 2
+# Tôi đã xây dựng API bằng DDD như thế nào ? - Phần 2
 
 Tiếp nối [phần 1](link) về DDD trong bài viết phần 2 lần này tôi xin phép được giới thiệu đến bạn đọc các kiến trúc thường dùng với DDD cũng như các khái niệm khác xoay quanh domain trong DDD, rất mong bạn đọc đón nhận nồng nhiệt.
 

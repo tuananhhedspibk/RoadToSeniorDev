@@ -1,4 +1,4 @@
-# Tôi đã xây dựng một API đơn giản bằng DDD như thế nào ? - Phần 4
+# Tôi đã xây dựng API bằng DDD như thế nào ? - Phần 4
 
 Chào mừng bạn đọc đã quay trở lại phần 4 trong series về DDD của tôi, bạn đọc có thể xem lại:
 

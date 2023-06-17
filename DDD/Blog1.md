@@ -1,4 +1,4 @@
-# Tôi đã xây dựng một API đơn giản bằng DDD như thế nào ? - Phần 1
+# Tôi đã xây dựng API bằng DDD như thế nào ? - Phần 1
 
 DDD đã và vẫn đang là một xu hướng thiết kế được ưa chuộng trong các hệ thống lớn, mang nặng tính nghiệp vụ ở thời điểm hiện tại. Thế nhưng việc hiểu rõ những định nghĩa mang tính "hàn lâm" của DDD lại rất mất thời gian, và để hỗ trợ cho các lập trình viên nói chung cũng như những ai đang có ý định tìm hiểu về DDD nói riêng có thể rút ngắn thời gian "thẩm thấu" những kiến thức "hàn lâm" của DDD tôi xin phép được trình bày với bạn đọc những kiến thức rất cơ bản cũng như những ví dụ minh hoạ thông qua series bài viết về DDD lần này, rất mong được bạn đọc đón nhận.
 
