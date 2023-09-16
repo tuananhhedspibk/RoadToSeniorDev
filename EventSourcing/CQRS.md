@@ -67,3 +67,47 @@ trong CQRS do đó `GraphQL` cũng có thể coi là một công cụ lí tưở
 
 ## CQRS, DDD và Event-Sourcing
 
+CQRS thường dược sử dụng kết hợp với **DDD** và **Event-Sourcing**. 3 khái niệm này tuy là khác nhau nhưng chúng lại bổ sung cho nhau.
+
+Khi một command được gửi tới command API của CQRS-based appllication, nó cũng sẽ được coi là một **command cho aggregate** trong DDD. Aggregate sau đó sẽ **tạo ra một hoặc nhiều domain events**, các events này sẽ được **lưu trữ trong một event store** bằng Event-Sourcing và được sử dụng sau đó.
+
+Ngoài ra các domain events được tạo ra trong quá trình cũng có thể sẽ được **chuyển tiếp** đến các events API để từ đó giúp kết nối hệ thống hiện thời với các hệ thống khác.
+
+Không những thế domain events cũng sẽ được chuyển tiếp tới các read page khác trong ứng dụng để update view. Do đó có một sự tương ứng giữa **technical domain event** và view, các events sẽ tác động lên các view với sự trợ giúp từ các hành động CRUD.
+
+## Quy tắc CAP và sự thống nhất sau cùng
+
+Quy tắc CAP là viết tắt của:
+
+- Consistency: tính thống nhất.
+- Availability: tính sẵn sàng.
+- Partition Tolerance: khả năng tiếp tục hoạt động ngay cả khi có lỗi.
+
+Một hệ thống phân tán đảm bảo được tính thống nhất (consistency) khi thao tác ghi phải được phản ánh lên toàn bộ các nodes trước khi trả về cho phía client, để từ đó mọi nodes trong hệ thống sé đều trả về một response duy nhất.
+
+Tính sẵn có (availability) mô tả việc một hệ thống có khả năng đáp ứng mọi write & read request tại mọi thời điểm, sẽ không bao giờ cho waiting time hoặc reject requests đến từ phía hệ thống.
+
+Partition Tolerance đảm bảo việc hệ thống vẫn sẽ hoạt động ngay cả khi có nodes fail hoặc mất kết nối giữa các nodes.
+
+Trên thực tế các hệ thống phân tán chỉ có thể đảm bảo được 2 trong số 3 tính chất nêu trên, tức là hoặc là CA, hoặc là CP hoặc là AP chứ không thể có cả 3.
+
+Việc thiếu đi tính nhất quán (consistency) được coi như là nguy hiểm nhất.
+
+## Tại sao lại sử dụng CQRS ?
+
+Một trong những lí do tiêu biểu đó là nó bổ sung qua lại với các concepts khác như DDD hay Event-Sourcing và GraphQL
+
+Việc CQRS chia tách rõ ràng giữa reading và writing cũng sẽ đem lại nhiều ưu điểm cho **kiến trúc microservices**.
+
+Ngoài ra việc kết nối tốt với DDD và Event-sourcing sẽ giúp việc chia tách giữa **technical code** và **business code** trở nên rõ ràng và dễ dàng hơn.
+
+Một nhược điểm thấy rõ nhất của CQRS đó là việc nó khá "phức tạp" thế nhưng hiẹn nay có rất nhiều framework hỗ trợ rất mạnh cho CQRS như NestJS (typescript, nodejs)
+
+## Tổng kết
+
+CQRS là một cách tiếp cận khá thú vị cho các hệ thống phân tán để từ đó có thể tận dụng được những ưu điểm của DDD và Event-sourcing. Dù rằng việc triển khai CQRS là phức tạp hơn so với kiến trúc client-server truyền thống nhưng bù lại ứng dụng lại có khả năng mở rộng cao trong thương lai.
+
+Cảm ơn các bạn đã đọc bài viết này của tôi về CQRS hi vọng rằng bạn đọc sẽ có được cho mình cái nhìn tổng quan cũng như nắm được những nội dung cơ bản về CQRS.
+
+Hẹn gặp lại ở các bài viết tiếp theo, xin trân thành cảm ơn.
+
