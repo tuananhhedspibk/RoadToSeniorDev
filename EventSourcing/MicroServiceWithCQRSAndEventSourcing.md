@@ -27,3 +27,30 @@ Các domain events được sinh ra trong quá trình thực thi command sẽ đ
 Lấy ví dụ, khi ta thực hiện "TransferFundCommand" để chuyển khoản sang một tài khoản khác, "FundsTransferredEvent" được sinh ra và lưu vào tron event-store như hình minh hoạ dưới đây
 
 ![Screen Shot 2023-09-20 at 22 55 57](https://github.com/tuananhhedspibk/NewAnigram-BE-DDD/assets/15076665/0a2d0729-6dc4-4545-aff8-112ff0a091d3)
+
+Trên thực tế, ta sẽ tiến hành chia quá trình ghi thành:
+
+- Ghi vào "event store".
+- Ghi vào "view store".
+
+và sẽ không có chuyện dữ liệu được phản ánh ngay lập tức từ "event store" sang "view store" - đây được gọi là **eventual consistency**, quá trình đồng nhất này sẽ diễn ra với "một chút delay".
+
+## Mô tả về project demo
+
+Như đã nói, đây là một bank account API trên một ứng dụng phân tán. Ý tưởng chính ở đây đó là mở, đóng một tài khoản ngân hàng, gửi tiền, rút tiền và chuyển tiền.
+
+Ở project này, tôi kết hợp các concepts:
+
+- DDD
+- CQRS
+- Event-Sourcing
+
+Event-sourcing sẽ phát huy thế mạnh khi ta muốn lấy ra lịch sử dữ liệu vì trong Event-Sourcing mọi request và kết quả của chúng đều được lưu lại
+
+Tôi sử dụng TypeScript và NestJS cho project này của mình.
+
+## Flow khi mở tài khoản ngân hàng
+
+Flowchart dưới đây mô tả quá trình mở một tài khoản ngân hàng thông qua POST request.
+
+![Screen Shot 2023-09-21 at 23 26 13](https://github.com/tuananhhedspibk/NewAnigram-FrontEnd-Public/assets/15076665/22348eac-204c-45d6-af3e-7b6af5a963ed)
