@@ -44,7 +44,7 @@ Khi đăng kí (Exception filter, Pipe, Guard, Interceptor) với app, ta sẽ l
 
 ## Providers
 
-Sẽ được khai báo kèm theo `@Injectable()` với mục đích dùng cho DI. Thông thường đây sẽ là nới thực hiện các task được uỷ nhiệm từ phía controller.
+Sẽ được khai báo kèm theo `@Injectable()` với mục đích dùng cho DI. Thông thường đây sẽ là nơi thực hiện các task được uỷ nhiệm từ phía controller.
 
 ## Middleware
 
@@ -290,7 +290,3 @@ export class CatsController {}
 const app = await NestFactory.create(AppModule);
 app.useGlobalInterceptors(LoggingInterceptor);
 ```
-
-
-
-
