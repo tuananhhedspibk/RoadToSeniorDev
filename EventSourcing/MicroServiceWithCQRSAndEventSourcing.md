@@ -54,3 +54,22 @@ Tôi sử dụng TypeScript và NestJS cho project này của mình.
 Flowchart dưới đây mô tả quá trình mở một tài khoản ngân hàng thông qua POST request.
 
 ![Screen Shot 2023-09-21 at 23 26 13](https://github.com/tuananhhedspibk/NewAnigram-FrontEnd-Public/assets/15076665/22348eac-204c-45d6-af3e-7b6af5a963ed)
+
+Giải thích đơn giản về flow tạo một tài khoản ngânn hàng mới như sau.sau
+
+API gateway sẽ nhận request và chuyển tiếp request đến microservice dưới dạng `gRPC request`. Mỗi một microservice sẽ được chia thành 2 application: `Command` và `Query`, khi tạo tài khoản ngân hàng mới ta cần `write request` do đó `Command Application` sẽ xử lí request lần này
+
+1. `OpenAccountDto` sẽ validate request data.
+2. `OpenAccountCommand` sẽ được sinh ra và được đưa vào `CommandBus` để thực thi.
+3. Kết quả của quá trình thực thi này sẽ là một `Aggregate` (đóng vai trò như một event store với state chứa thông tin về aggregate).
+4. Aggregate sau đó sẽ tạo ra một `AccountOpenedEvent` và lưu nó vào trong MongoDB.
+5. `AccountOpenedEvent` sẽ được đưa vào Kafka để chuyển sang Query Application nhằm mục đích đồng bộ hoá giữa `View Database` và `Write Database`.
+6. Sau đó `OpenAccountSaga` sẽ gửi một `gRPC request` sang microservice thứ hai đó là *bank-funds-svc* để khởi tạo số tiền ban đầu cho tài khoản ngân hàng.
+7. Request khởi tạo số tiền có trong tài khoản ngân hàng sẽ là write request nên do đó command bên phía *bank-funds-svc* sẽ hoạt động.
+8. Quá trình hoạt động command khởi tạo số tiền của tài khoản bên phía *bank-funds-svc* cũng sẽ tương tự như `OpenAccountCommand` phía trên.
+
+## Code Snippets
+
+Để dễ hiểu hơn, tôi sẽ chia sẻ một vài đoạn code nhỏ ở đây để bạn đọc tiện theo dõi hơn.
+
+### Controller
