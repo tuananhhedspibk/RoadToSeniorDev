@@ -65,4 +65,4 @@ obj2.__proto__; // → { a: 1 }
 
 ## Tài liệu tham khảo
 
-https://viblo.asia/p/prototype-trong-javascript-RQqKLzOrl7z
+<https://viblo.asia/p/prototype-trong-javascript-RQqKLzOrl7z>
