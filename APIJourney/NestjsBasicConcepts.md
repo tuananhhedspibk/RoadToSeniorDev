@@ -62,12 +62,11 @@ Cũng được khai báo thêm với `Injectable`
 import {Injectable, NestMiddleware} from "@nestjs/common";
 import {Request, Response, NextFunction} from "express";
 
-// classとして定義する
-@Injectable() // @Injectable() デコレータの適用
+@Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    console.log("Request..."); // Middleware の処理
-    next(); // 次の関数へとコントロールを引き渡す
+    console.log("Request...");
+    next();
   }
 }
 
@@ -84,11 +83,8 @@ Có 2 cách sử dụng Middleware:
 
 ```ts
 export class AppModule implements NestModule {
-  // NestModule インターフェースの実装
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(LoggerMiddleware) // Middleware の適用
-      .forRoutes(CatsController); // 適用対象の Route を指定
+    consumer.apply(LoggerMiddleware).forRoutes(CatsController);
   }
 }
 ```
@@ -107,16 +103,15 @@ Thường được định nghĩa với decorator là `Catch()`. Được sử d
 Cơ chế mặc định ở đây đó là nó sẽ tìm ra ngoại lệ, sau đó sẽ chuyển sang dạng HTTP Response.
 
 ```ts
-@Catch(HttpException) // @Catch() デコレータの適用、HttpException をハンドルすることを宣言
+@Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
-  // ExceptionFilter インターフェースの実装
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
 
-    // レスポンスを加工
+    // Chỉnh sửa lại response
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),
@@ -132,7 +127,7 @@ Exception filter có thể được sử dụng cho cả 3 level: method, contro
 
 ```ts
 @Post()
-@UseFilters(HttpExceptionFilter) // Exception filter を登録
+@UseFilters(HttpExceptionFilter)
 async create(@Body() createCatDto: CreateCatDto) {
   // ...
 }
@@ -174,13 +169,12 @@ Có tất cả 9 loại pipes:
 Ví dụ:
 
 ```ts
-@Injectable() // @Injectable() デコレータの適用
+@Injectable()
 export class ParseIntPipe implements PipeTransform<string, number> {
-  // PipeTransform インターフェースの実装
   transform(value: string, metadata: ArgumentMetadata): number {
-    const val = parseInt(value, 10); // データの変換
+    const val = parseInt(value, 10);
     if (isNaN(val)) {
-      throw new BadRequestException("Validation failed"); // Pipe を適用できないケースは例外を送出
+      throw new BadRequestException("Validation failed");
     }
     return val;
   }
@@ -191,14 +185,14 @@ Pipe được sử dụng ở cả 4 levels: param, method, controller, global.
 
 ```ts
 @Get(':id')
-async findOne(@Param('id', ParseIntPipe) id) { // パラメータ id に対する Pipe を登録
+async findOne(@Param('id', ParseIntPipe) id) {
   return this.catsService.findOne(id);
 }
 ```
 
 ```ts
 @Post()
-@UsePipes(ValidationPipe) // Pipe を登録
+@UsePipes(ValidationPipe)
 async create(@Body() createCatDto: CreateCatDto) {
   // ...
 }
@@ -216,15 +210,13 @@ app.useGlobalPipes(ValidationPipe);
 Thường có nhiệm vụ quyết định xem có nên xử lí request không dựa theo (quyền, role, ACL, ...)
 
 ```ts
-@Injectable() // @Injectable() デコレータの適用
+@Injectable()
 export class AuthGuard implements CanActivate {
-  // CanActivate インターフェースの実装
   canActivate(
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    return validateRequest(request); // リクエストに対する何らかの検証 (true であれば次の処理へと進む)
-  }
+    return validateRequest(request);
 }
 ```
 
@@ -232,7 +224,7 @@ Guard có thể được sử dụng ở method, controller, global levels.
 
 ```ts
 @Post()
-@UseGuards(AuthGuard) // Guard を登録
+@UseGuards(AuthGuard)
 async create(@Body() createCatDto: CreateCatDto) {
   // ...
 }
@@ -261,16 +253,15 @@ Có thể thực hiện được những điều sau đây:
 - Ghi đè hàm
 
 ```ts
-@Injectable() // @Injectable() デコレータの適用
+@Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  // NestInterceptor  インターフェースの実装
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     console.log("Before...");
 
     const now = Date.now();
-    return next.handle().pipe(
-      tap(() => console.log(`After... ${Date.now() - now}ms`)) // レスポンスが返るまでの経過時間を表示
-    );
+    return next
+      .handle()
+      .pipe(tap(() => console.log(`After... ${Date.now() - now}ms`)));
   }
 }
 ```
@@ -279,7 +270,7 @@ Nó được sử dụng ở method, controller, global levels
 
 ```ts
 @Post()
-@UseInterceptors(LoggingInterceptor) // Interceptor を登録
+@UseInterceptors(LoggingInterceptor)
 async create(@Body() createCatDto: CreateCatDto) {
   // ...
 }
