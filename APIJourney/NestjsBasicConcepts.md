@@ -1,6 +1,9 @@
 # Các concepts cơ bản trong Nestjs
 
-Bài viết được lược dịch từ [nguồn](https://zenn.dev/morinokami/articles/nestjs-overview)
+Bài viết được lược dịch từ:
+
+- <https://zenn.dev/morinokami/articles/nestjs-overview>
+- <https://medium.com/aws-tip/understanding-nestjs-architecture-f257d054211d>
 
 ## Tổng quan
 
@@ -56,14 +59,14 @@ Là hàm được gọi phía trước route, có khả năng truy cập đến 
 Cũng được khai báo thêm với `Injectable`
 
 ```ts
-import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import {Injectable, NestMiddleware} from "@nestjs/common";
+import {Request, Response, NextFunction} from "express";
 
 // classとして定義する
 @Injectable() // @Injectable() デコレータの適用
 export class LoggerMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    console.log('Request...'); // Middleware の処理
+    console.log("Request..."); // Middleware の処理
     next(); // 次の関数へとコントロールを引き渡す
   }
 }
@@ -80,7 +83,8 @@ Có 2 cách sử dụng Middleware:
 ① Sử dụng theo từng module, controller cụ thể.
 
 ```ts
-export class AppModule implements NestModule { // NestModule インターフェースの実装
+export class AppModule implements NestModule {
+  // NestModule インターフェースの実装
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(LoggerMiddleware) // Middleware の適用
@@ -104,7 +108,8 @@ Cơ chế mặc định ở đây đó là nó sẽ tìm ra ngoại lệ, sau đ
 
 ```ts
 @Catch(HttpException) // @Catch() デコレータの適用、HttpException をハンドルすることを宣言
-export class HttpExceptionFilter implements ExceptionFilter { // ExceptionFilter インターフェースの実装
+export class HttpExceptionFilter implements ExceptionFilter {
+  // ExceptionFilter インターフェースの実装
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -112,13 +117,11 @@ export class HttpExceptionFilter implements ExceptionFilter { // ExceptionFilter
     const status = exception.getStatus();
 
     // レスポンスを加工
-    response
-      .status(status)
-      .json({
-        statusCode: status,
-        timestamp: new Date().toISOString(),
-        path: request.url,
-      });
+    response.status(status).json({
+      statusCode: status,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+    });
   }
 }
 ```
@@ -172,11 +175,12 @@ Ví dụ:
 
 ```ts
 @Injectable() // @Injectable() デコレータの適用
-export class ParseIntPipe implements PipeTransform<string, number> { // PipeTransform インターフェースの実装
+export class ParseIntPipe implements PipeTransform<string, number> {
+  // PipeTransform インターフェースの実装
   transform(value: string, metadata: ArgumentMetadata): number {
     const val = parseInt(value, 10); // データの変換
     if (isNaN(val)) {
-      throw new BadRequestException('Validation failed'); // Pipe を適用できないケースは例外を送出
+      throw new BadRequestException("Validation failed"); // Pipe を適用できないケースは例外を送出
     }
     return val;
   }
@@ -213,7 +217,8 @@ Thường có nhiệm vụ quyết định xem có nên xử lí request không 
 
 ```ts
 @Injectable() // @Injectable() デコレータの適用
-export class AuthGuard implements CanActivate { // CanActivate インターフェースの実装
+export class AuthGuard implements CanActivate {
+  // CanActivate インターフェースの実装
   canActivate(
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -257,16 +262,15 @@ Có thể thực hiện được những điều sau đây:
 
 ```ts
 @Injectable() // @Injectable() デコレータの適用
-export class LoggingInterceptor implements NestInterceptor { // NestInterceptor  インターフェースの実装
+export class LoggingInterceptor implements NestInterceptor {
+  // NestInterceptor  インターフェースの実装
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    console.log('Before...');
+    console.log("Before...");
 
     const now = Date.now();
-    return next
-      .handle()
-      .pipe(
-        tap(() => console.log(`After... ${Date.now() - now}ms`)), // レスポンスが返るまでの経過時間を表示
-      );
+    return next.handle().pipe(
+      tap(() => console.log(`After... ${Date.now() - now}ms`)) // レスポンスが返るまでの経過時間を表示
+    );
   }
 }
 ```
@@ -290,3 +294,21 @@ export class CatsController {}
 const app = await NestFactory.create(AppModule);
 app.useGlobalInterceptors(LoggingInterceptor);
 ```
+
+## Về repository
+
+Repository trong một project NestJS sẽ đảm nhận nhiệm vụ giao tiếp với DB cũng như tiến hành chỉnh sửa, thêm mới dữ liệu.
+
+Ngoài ra việc giao tiếp với các hệ thống bên ngoài cũng do repository đảm nhận
+
+## Tổng kết
+
+Gom tất cả các thành phần đã kể trên lại, chúng ta có thể phác hoạ ra mô hình tổng quan của một ứng dụng sử dụng NestJS như sau:
+
+![Screen Shot 2023-10-09 at 12 42 09](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/cb55cdf8-3e00-46a6-99ff-99dc889c4cdb)
+
+Cảm ơn bạn đọc đã nồng nhiệt đón nhận bài viết của tôi, hi vọng bài viết đã đem lại cho bạn đọc một cái nhìn tổng quan nhất về một ứng dụng NestJS.
+
+Hẹn gặp lại bạn đọc ở những bài viết kế tiếp, xin chân thành cảm ơn.
+
+Happy Learning.
