@@ -164,3 +164,87 @@ export const Roles = (...role: Role[]) => SetMetadata(ROLE_KEY, role);
 ```
 
 Ở trên ta định nghĩa key là "role", đi kèm với nó là một mảng Role đóng vai trò làm value.
+
+## Role Guard
+
+```ts
+import {CanActivate, ExecutionContext, Injectable} from "@nestjs/common";
+import {Reflector} from "@nestjs/core";
+import {Observable} from "rxjs";
+import {ROLE_KEY} from "src/decorators/roles.decorator";
+import {Role} from "src/enums/role.enum";
+import {AccessContorlService} from "src/shared/access-control.service";
+
+export class TokenDto {
+  id: number;
+  role: Role;
+}
+
+@Injectable()
+export class RoleGuard implements CanActivate {
+  constructor(
+    private reflector: Reflector,
+    private accessControlService: AccessContorlService
+  ) {}
+
+  canActivate(
+    context: ExecutionContext
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLE_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    const request = context.switchToHttp().getRequest();
+    const token = request["token"] as TokenDto;
+
+    for (let role of requiredRoles) {
+      const result = this.accessControlService.isAuthorized({
+        requiredRole: role,
+        currentRole: token.role,
+      });
+
+      if (result) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+```
+
+Với Role Guard ta inject Reflector để lấy thông tin metadata về handler method cũng như các roles mà nó yêu cầu, từ đó gọi đến method `isAuthorized` của `accessControlService` đã định nghĩa ở trên để kiểm tra xem role truyền lên từ phía client có thoả mãn yêu cầu của handler hay không.
+
+## Áp dụng RBAC vào handler methods
+
+```ts
+import {Controller, Get, UseGuards} from "@nestjs/common";
+import {Role} from "src/enums/role.enum";
+import {Roles} from "src/decorators/roles.decorator";
+
+@Controller()
+export class TestController {
+  @Get("admin")
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard, RoleGuard)
+  async adminOnlyEndpoint() {
+    return "Welcome admin";
+  }
+
+  @Get("user-moderator")
+  @Roles(Role.USER, Role.MODERATOR)
+  @UseGuards(AuthGuard, RoleGuard)
+  async userModeratorEndpoint() {
+    return "Welcome user or moderator";
+  }
+}
+```
+
+Với từng handler method, ta sẽ áp dụng `@Roles` decorator, đi kèm với đó là các roles mà client cần phải có để có thể gọi được handler method tương ứng.
+
+Method thứ hai yêu cầu role **HOẶC** là **Role.USER** **HOẶC** là **Role.MODERATOR**
+
+## Tổng kết
+
+Các thư viện hiện có về RBAC có khá nhiều tính năng "mạnh" thế nhưng trong trường hợp bạn muốn tự xây dựng cho mình một cơ chế RBAC riêng thì bài viết này có thể sẽ là một nguồn tham khảo hữu ích cho bạn. Happy coding.
