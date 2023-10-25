@@ -311,4 +311,100 @@ const stateMachine = new sfn.StateMachine(this, "CronStateMachine", {
 
 Cuối cùng là tạo stateMachine từ defintion được định nghĩa ở trên. Thành quả chúng ta thu được trên AWS console sẽ như sau:
 
-[Chèn ảnh]
+![Screen Shot 2023-10-25 at 23 41 18](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/cc414941-f41d-43ab-9e85-63795aee79f4)
+_Hình 4_
+
+Giải thích thêm một chút về 2 dòng code
+
+```ts
+submitLambda.grantInvoke(stateMachine.role);
+checkLambda.grantInvoke(stateMachine.role);
+```
+
+Để StateMachine có thể gọi được đến hai lamda functions đã định nghĩa ở trên ta cần cung cấp **quyền - IAM Role** cho StateMachine. 2 dòng codes phía trên sẽ cung cấp cho StateMachine quyền gọi đến hai lambda functions. Kết quả thu được sẽ như sau:
+
+![Screen Shot 2023-10-25 at 22 28 26](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/fdeb470a-3d9b-46a8-9626-a5a68077cba5)
+_Hình 5_
+
+Tiếp theo chúng ta sẽ thử chạy StepFunction đã được tạo ở trên để xem kết quả sẽ như thế nào.
+
+Nhấn vào nút **Start Execution**
+
+![Screen Shot 2023-10-26 at 7 17 11](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/8cf715e4-2143-4565-8fa7-fc17e31e2bad)
+_Hình 6_
+
+Sau đó nhập tham số đầu vào, ở đây tham số đầu vào này sẽ được truyền đến cho state đầu tiên đó là **SubmitJob**, tham số này sau đó sẽ được truyền đến cho hàm lambda **SubmitLambda**
+
+```py
+def main(event, context):
+  print('The job is submitted successfully!')
+  # Return the handling result
+  return {
+    "id": event['id'],
+    "status": "SUCCEEDED",
+  }
+```
+
+Để ý thấy rằng trong giá trị trả về của hàm, ta có truy xuất thuộc tính id của event như sau `event['id']`, nên tham số truyền vào cho StepFunction sẽ là:
+
+![Screen Shot 2023-10-26 at 7 17 25](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/1134b49e-7814-44fa-81d0-574736d6236e)
+_Hình 7_
+
+Nhấn **Start Execution**, và kết quả thu được sẽ như sau
+
+![Screen Shot 2023-10-26 at 7 17 40](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/f44fc37d-7431-4455-8ead-8d4524a0cb0e)
+_Hình 8_
+
+Ta thấy rằng **SubmitJob** state sẽ được chạy đầu tiên, sau khi kết thúc xong sẽ đến lượt **WaitX** chạy, do đây là **wait state** nên StepFunction sẽ chuyển sang trạng thái chờ trong 30s như đã thiết lập trong code
+
+```ts
+const waitX = new sfn.Wait(this, "Wait X Seconds", {
+  time: sfn.WaitTime.duration(cdk.Duration.seconds(30)),
+});
+```
+
+Sau khi **WaitX** kết thúc các state còn lại sẽ được thực thi cho đến hết.
+
+![Screen Shot 2023-10-25 at 22 25 27](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/e03506b8-cc28-4daf-9026-e475f04cdd20)
+_Hình 9_
+
+Ta phân tích quá trình chạy như sau, đầu tiên tham số đầu vào của stepfunction
+
+![Screen Shot 2023-10-26 at 7 17 25](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/1134b49e-7814-44fa-81d0-574736d6236e)
+_Hình 10_
+
+là `{"id": "1"}` sẽ được truyền vào **SubmitJob** state, state này sẽ gọi đến hàm lambda **SubmitLambda** và truyền nguyên bộ tham số `{"id": 1}` cho hàm lambda. Hàm này trả ra kết quả
+
+```py
+return {
+  "id": event['id'],
+  "status": "SUCCEEDED",
+}
+```
+
+là một object với status property có giá trị là "SUCCEEDED", kết quả này sẽ được coi như đầu ra của state **SubmitJob** state theo như dòng code
+
+![Screen Shot 2023-10-26 at 7 26 15](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/40353dab-3f95-45fe-a31f-35658bad0f86)
+_Hình 11_
+
+Tiếp đến là **WaitX**, state này không thay đổi kết quả đầu ra của **SubmitJob** mà truyền nguyên si sang cho **GetJobStatus**, state này sẽ gọi đến hàm **CheckLambda**
+
+```py
+def main(event, context):
+  if event["status"] == "SUCCEEDED":
+    return {"status": "SUCCEEDED", "id": event["id"]}
+  else:
+    return {"status": "FAILED", "id": event["id"]}
+```
+
+như đã thấy ở trên khi **GetJobStatus** nhận được object `{ "id": event['id'], "status": "SUCCEEDED" }` từ **WaitX**, nó sẽ truyền object này sang cho hàm **CheckLambda**, theo như xử lí của hàm thì kết quả trả về của nó sẽ là `{"status": "SUCCEEDED", "id": event["id"]}`
+
+Kết quả này sẽ được truyền đến cho **JobComplete** - là một **choice state**, nó sẽ kiểm tra giá trị của thuộc tính **status** được lấy ra từ context thông qua `$.status`, do giá trị của status trong lần này là "SUCCEEDED" nên **GetFinalJobStatus** sẽ được thực thi, state này lại gọi tới hàm **CheckLambda** và do `event["status"]` có giá trị là "SUCCEEDED" nên giá trị đầu ra của **GetFinalJobStatus** sẽ là `{"status": "SUCCEEDED", "id": event["id"]}`.
+
+Khi **GetFinalJobStatus** chạy xong thì cũng là lúc StepFunction kết thúc.
+
+## Tổng kết
+
+Trên đây là một ví dụ đơn giản về StepFunction và AWS CDK, hi vọng bạn đọc có thể có được cái nhìn tổng quan nhất về StepFunction cũng như cách thức triển khai nó thông qua AWS CDK.
+
+Bài viết đến đây là kết thúc, xin hẹn gặp lại bạn đọc ở các bài viết tiếp theo. Happy hacking !
