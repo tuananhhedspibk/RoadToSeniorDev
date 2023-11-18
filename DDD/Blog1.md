@@ -106,12 +106,12 @@ export class UserEntity extends BaseEntity {
 }
 ```
 
-tôi tạo một method `updateDetail` bên trong class `UserEntity` (đây chính là User Aggregate class), method này sẽ cập nhật thông tin của user detail nên do đó việc cập nhật user detail trên thực tế trông sẽ như sau:
+Tôi tạo một method `updateDetail` bên trong class `UserEntity` (đây chính là User Aggregate class), method này sẽ cập nhật thông tin của user detail nên do đó việc cập nhật user detail trên thực tế trông sẽ như sau:
 
 ```ts
 const user = new UserEntity(); // Định nghĩa User Aggregate
 
-user.updateDetail({ nickName: 'testUser' }); // Cập nhật thông tin detail thông qua root aggregate là user
+user.updateDetail({nickName: "testUser"}); // Cập nhật thông tin detail thông qua root aggregate là user
 ```
 
 Và User aggregate sẽ "kết tập" userDetail bên trong nó thông qua thuộc tính của class như sau:
