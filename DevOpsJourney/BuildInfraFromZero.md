@@ -52,6 +52,18 @@ Như ví dụ ở trên đây tôi có một `aws_vpc` với tên là `main`, tr
 
 đều được chỉ ra một cách cụ thể.
 
+Mỗi một resource đều có các output (có thể hiểu như các public property của riêng mình).
+
+Ví dụ:
+
+Với AWS EC2 instance resource, sau khi được tạo ra nó sẽ có cho mình các thuộc tính cơ bản như:
+
+- arn
+- public_ip
+- ...
+
+Bạn đọc có thể tham khảo chi tiết hơn tại <https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#attribute-reference>
+
 ### Terraform variable
 
 Tương tự như các ngôn ngữ lập trình (Programming Language) khác, terraform language cũng sở hữu cho mình các định nghĩa riêng về biến.
@@ -124,6 +136,7 @@ Với từng micro-service tôi sẽ tiến hành thực thi theo kiến trúc c
 **Kiến trúc mạng** (vpc, public_subnet, private_subnet)
 
 ![Screen Shot 2023-12-07 at 22 22 27](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/da08fd8d-4644-4a4b-ab7b-112b1fe44791)
+_Hình 1_
 
 Phân tích từng thành phần trong hình vẽ trên. Ở đây với mỗi service tôi sẽ tạo **riêng một vpc**.
 
@@ -139,6 +152,7 @@ Database (ở đây là AWS RDS) sẽ được đặt bên trong **private_subne
 **Kiến trúc ứng dụng** (ECS, Load Balancer)
 
 ![Screen Shot 2023-12-07 at 22 30 17](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/7334d9cf-345d-4f41-9f90-d0496814e654)
+_Hình 2_
 
 Ở đây tôi chỉ thuần tuý đặt phía trước các ECS một **Application Load Balancer**, bản thân bên trong ECS tôi cũng đặt một **nginx load balancer** đóng vai trò **reverse proxy** bảo vệ cho server code chạy bên trong ECS service.
 
@@ -252,5 +266,195 @@ resource "aws_subnet" "public" {
 do là **private_subnet** - tức là **KHÔNG THỂ** nhìn thấy mạng con này từ global internet, nên ta cần thiết lập thuộc tính `map_public_ip_on_launch` với giá trị `false` để mạng con này **KHÔNG CÓ public IP** từ đó global internet **KHÔNG THỂ** nhìn thấy nó.
 
 Còn với **nat_gateway** tôi sẽ làm như sau:
+
+```terraform
+// ElasticIP cho _NAT _gateway
+resource "aws_eip" "nat" {
+  vpc        = true
+  depends_on = [aws_internet_gateway.main]
+}
+
+// _NAT _gateway
+resource "aws_nat_gateway" "main" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = element(aws_subnet.public.*.id, 0) // config cho việc đặt nat_gateway tại public_subnet
+
+  tags = {
+    Name = "${var.app_name}-nat"
+  }
+}
+```
+
+Giải thích qua cho bạn đọc thì nat_gateway là một service cho phép các instances trong private_subnet có thể kết nối ra ngoài global internet và **KHÔNG CHO PHÉP** global internet truy cập vào instances bên trong private_subnet.
+
+Cụ thể hơn bạn đọc có thể xem tại: <https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html>
+
+Trở lại với đoạn code thiết lập nat_gateway ở trên, tôi thiết lập:
+
+- ElasticIP cho nat_gateway.
+- Đặt nat_gateway tại public_subnet để từ đó instances trong private_subnet có thể đi ra global internet.
+
+### Proxy module
+
+Proxy ở đây thực chất chỉ là 1 EC2 instance mà thôi. Mục đích chính của tôi khi thiết lập một proxy "chắn" trước RDS đó là tạo một "cổng vào" cũng như "giới hạn" các truy cập (không tính truy cập từ phía server code) vào RDS.
+
+Cụ thể như sau: ở **hình 1** phía trên các bạn có thể thấy RDS được đặt bên trong private_subnet nên **chắc chắn** từ global internet ta **KHÔNG THỂ** truy cập vào RDS được, do đó proxy ở đây sẽ hoạt động như một "cổng vào" khi dev muốn truy cập vào RDS để query cũng như chỉnh sửa dữ liệu.
+
+![Screen Shot 2023-12-08 at 7 43 36](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/c3e89d04-0372-4dd0-bf67-5d66417c30f6)
+_Hình 3_
+
+Ở **hình 3**, bạn có thể thấy rằng dev sẽ truy cập vào RDS thông qua SSH Tunel, việc làm này:
+
+- Vừa đảm bảo rằng dev có thể truy cập RDS.
+- Vừa đảm bảo rằng số lượng người có thể truy cập vào RDS là giới hạn.
+
+Do đó proxy sẽ hoạt động như một "tấm khiên" phía trước database của chúng ta.
+
+Tôi sẽ thiết lập proxy như sau:
+
+```terraform
+resource "aws_security_group" "proxy" {
+  name          = "${var.app_name}-proxy-sg"
+  description   = "Allow ssh connect to db proxy"
+  vpc_id        = var.vpc_id
+
+  // Inbound rule
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  // Outbound rule
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.app_name}-proxy-sg"
+  }
+}
+
+resource "aws_instance" "proxy" {
+  instance_type   = "t2.micro"
+  ami             = local.ami
+
+  subnet_id       = var.subnet_id // public_subnet id
+  security_groups = [aws_security_group.proxy.id]
+  key_name        = "key_pair_name"
+
+  tags = {
+    Name = "${var.app_name}-db-proxy"
+  }
+}
+```
+
+Như đoạn code trên, để giới hạn chỉ cho phép truy cập vào proxy bằng SSH tôi thiết lập **inbound** cho **security_group** của proxy chỉ là cổng 22 mà thôi.
+
+Do proxy chỉ đóng vai trò như một "vùng đệm" nằm phía trước RDS nên chỉ cần một **micro** instance là đủ. Và tất nhiên rồi, ta **BẮT BUỘC** phải đặt proxy trong public_subnet để có thể đi vào nó từ global internet.
+
+### RDS module
+
+Ở module này tôi tiến hành định nghĩa một RDS instance và cluster chứa instance đó. Mục đích chính là để lưu dữ liệu (nói cách khác đây chính là database của service).
+
+```terraform
+resource "aws_rds_cluster" "this" {
+  cluster_identifier              = "${var.app_name}-mysql-cluster"
+  engine                          = local.rds_engine
+  engine_version                  = "8.0.mysql_aurora.3.02.0" // định nghĩa engine: mysql hay postgreSQL
+
+  db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.default.name
+  db_subnet_group_name            = aws_db_subnet_group.aurora_subnet_group.name
+  vpc_security_group_ids          = [aws_security_group.this.id]
+  port                            = var.port
+
+  database_name                   = var.database_name // tên của database
+  master_username                 = var.master_username
+  master_password                 = var.master_password
+
+  skip_final_snapshot             = false
+  final_snapshot_identifier       = "${var.app_name}-mysql-final-snapshot"
+}
+
+resource "aws_rds_cluster_instance" "this" {
+  identifier              = "${var.app_name}-mysql-identifier"
+  cluster_identifier      = aws_rds_cluster.this.id
+
+  db_subnet_group_name    = aws_db_subnet_group.aurora_subnet_group.name
+  db_parameter_group_name = aws_db_parameter_group.default.name
+
+  engine                  = local.rds_engine
+  instance_class          = "db.t3.medium" // định nghĩa capacity cho rds instance
+}
+```
+
+Về cơ bản thì việc định nghĩa RDS không có gì quá "phức tạp", bạn đọc có thể tham khảo thêm tại: <https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_instance>
+
+Chỉ có một chú ý đó là: `master_username` và `master_password` sẽ **KHÔNG ĐƯỢC** sử dụng trong thực tế vận hành. Cũng không hẳn là không được mà là **KHÔNG NÊN**, thay vào đó:
+
+- Mỗi một dev khi truy cập vào DB sẽ có một account riêng với các quyền được chỉ định cụ thể.
+- Bản thân service khi truy cập vào DB cũng sẽ được cấp một account riêng.
+
+Tất cả những việc trên nhằm mục đích quản lí truy xuất cũng như tracing xem **AI** đã thực thi câu SQL nào **TẠI THỜI ĐIỂM NÀO** khi hệ thống gặp sự cố hoặc bị sập.
+
+### ecs_cluster & ecs_api modules
+
+Tôi sẽ nói gộp 2 modules này làm một vì chúng đều liên quan đến ecs. Mục đích chính khi tôi tiến hành chia thành 2 modules con **cluster** và **api** chỉ đơn thuần là làm tách bạch phần định nghĩa **ecs_cluster** với **ecs_service** mà thôi.
+
+Với ecs_cluster:
+
+```terraform
+resource "aws_ecs_cluster" "this" {
+  name = "${var.app_name}"
+}
+```
+
+ta chỉ cần định nghĩa tên của cluster là đủ.
+
+```terraform
+resource "aws_ecs_service" "this" {
+  depends_on      = [aws_lb_listener_rule.this]
+
+  name            = var.app_name
+
+  desired_count   = 1
+  launch_type     = "FARGATE"
+  // sử dụng fargate với mục đích để AWS sẽ quản lí mọi server instances của service cho chúng ta
+
+  cluster         = var.cluster_name
+  task_definition = aws_ecs_task_definition.this.arn // tham chiếu đến task defintion
+
+  network_configuration {
+    subnets         = var.subnet_ids
+    security_groups = [aws_security_group.this.id]
+  }
+
+  load_balancer {
+    container_name   = "nginx"
+    container_port   = local.port_nginx
+    target_group_arn = var.lb_target_group_arn
+  }
+}
+```
+
+Để bạn đọc tiện theo dõi tôi sẽ đăng lại hình minh hoạ cho kiến trúc phía **ecs_service** ở đây
+
+![Screen Shot 2023-12-07 at 22 30 17](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/7334d9cf-345d-4f41-9f90-d0496814e654)
+
+Như bạn đọc có thể thấy
+
+```terraform
+load_balancer {
+  container_name   = "nginx"
+  container_port   = local.port_nginx
+  target_group_arn = var.lb_target_group_arn
+}
+```
+
+đoạn code này sẽ tạo ra nginx reverse proxy. Lúc này mọi request đến service sẽ đi qua nginx trước khi đi vào trong service của chúng ta.
 
 ## Tổng kết
