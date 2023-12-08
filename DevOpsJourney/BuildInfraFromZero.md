@@ -457,4 +457,74 @@ load_balancer {
 
 đoạn code này sẽ tạo ra nginx reverse proxy. Lúc này mọi request đến service sẽ đi qua nginx trước khi đi vào trong service của chúng ta.
 
+Nói qua về ecs, bạn đọc có thể tham khảo hình dưới đây
+
+![Screen Shot 2023-11-18 at 22 42 22](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/70305f62-d7d1-4eb2-9ee9-cddcdab3b854)
+_Hình 4_
+
+Hình 4 này minh hoạ cho cách thức vận hành của ecs. Trong đó:
+
+- ECR sẽ lưu DockerImage tương ứng với app.
+- Task Definition sẽ là blueprint của app (JSON file với các params, containers cấu thành nên app).
+
+Về cơ bản ở đây, khi muốn vận hành 1 service bằng ecs, ta cần:
+
+1. Docker hoá service thành một docker_image
+2. Đưa docker_image này lên một registry (ở đây là ecr)
+3. Từ registry ta sẽ tiến hành dựng task_defintion
+4. Từ task_definition ta sẽ tiến hành dựng nên service chạy trong ecs
+
+Trong trường hợp của mình tôi thiết lập task_definition như sau:
+
+```terraform
+resource "aws_ecs_task_definition" "this" {
+  family                = "newanigram-api"
+
+  container_definitions = data.template_file.task_definition.rendered // tham chiếu đến file định nghĩa task_definition
+
+  cpu                   = "256"
+  memory                = "512"
+  network_mode          = "awsvpc"
+
+  task_role_arn         = aws_iam_role.ecs_iam_role.arn
+  execution_role_arn    = aws_iam_role.ecs_iam_role.arn
+}
+
+data "template_file" "task_definition" {
+  template = file("./ecs_api/task_definition.json")
+
+  vars = {
+    account_id        = local.account_id
+    region            = local.region
+
+    repository_api    = "api"
+  }
+}
+```
+
+Nội dung của task_definition sẽ nằm trong file JSON với cú pháp như sau:
+
+```JSON
+[
+  {
+    "name": "api",
+    "image": "${account_id}.dkr.ecr.${region}.amazonaws.com/${repository_api}:${api_tag}",
+    "cpu": 0,
+    "memory": 128,
+    "portMappings": [
+      {
+        "containerPort": ${port_api},
+        "hostPort": ${port_api}
+      }
+    ],
+  }
+]
+```
+
 ## Tổng kết
+
+OK, vậy là tôi đã trình bày với bạn đọc một cách sơ lược về cách tôi đã xây dựng infrastructure trên AWS cho micro-service bằng terraform từ con số 0 như thế nào.
+
+Hi vọng bạn đọc sẽ có được cho mình một cái nhìn trực quan nhất về kiến trúc infrastructure cho một micro-service cơ bản cũng như cách sử dụng terraform để triển khai infrastructure.
+
+Hẹn gặp lại bạn đọc ở các bài viết tiếp theo, xin cảm ơn.
