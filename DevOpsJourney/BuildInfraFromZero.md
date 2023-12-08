@@ -521,6 +521,32 @@ Nội dung của task_definition sẽ nằm trong file JSON với cú pháp như
 ]
 ```
 
+## Thực thi
+
+Để triển khai code terraform, tôi thực thi lệnh `terraform apply`, trước khi thực thi, terraform sẽ cho chúng ta preview những resources nào sẽ được tạo ra như hình dưới đây
+
+![Screen Shot 2023-12-08 at 19 39 10](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/cd124433-839e-4a01-a7fc-8e125f8d59fc)
+
+Do số lượng resources được tạo ra khá nhiều nên tôi chỉ trích dẫn một phần nhỏ trong số đó mà thôi. Và đây là kết quả mà chúng ta sẽ thu được khi xác nhận trên AWS console.
+
+VPC:
+
+![Screen Shot 2023-12-08 at 19 48 17](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/096698c9-1346-4b8a-8c1f-e226e8cc1433)
+
+RDS:
+
+![Screen Shot 2023-12-08 at 19 48 01](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/dc805799-d47e-4f74-8e0b-e6505ae8a504)
+
+Proxy:
+
+![Screen Shot 2023-12-08 at 19 48 33](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/31bed9c4-c18a-4755-9d0d-106800ed7742)
+
+ECS:
+
+![Screen Shot 2023-12-08 at 19 47 48](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/9f43e432-3c9b-41dc-9b48-16847d64ea78)
+
+Các thông tin thiết lập bằng code terraform đều được phản ánh chính xác trên AWS console (bạn đọc có thể xem phần khoanh đỏ trong các hình trên để biết rõ hơn).
+
 ## Tổng kết
 
 OK, vậy là tôi đã trình bày với bạn đọc một cách sơ lược về cách tôi đã xây dựng infrastructure trên AWS cho micro-service bằng terraform từ con số 0 như thế nào.
