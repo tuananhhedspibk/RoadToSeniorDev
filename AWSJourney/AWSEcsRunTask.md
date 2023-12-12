@@ -22,3 +22,15 @@ Giải pháp ở đây đó chính là SAGA, có thể hiểu đơn giản rằn
 Như hình minh hoạ dưới đây.
 
 ![Screen Shot 2023-12-11 at 23 33 51](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/1385f989-20dc-4afb-b732-c121b8b6bf72)
+
+Có 2 cách triển khai SAGA:
+
+1. **Choreography**: mỗi local transaction sẽ publish _domain-event_, _domain-event_ này sẽ trigger local transactions ở các services khác (bản thân các services này sẽ tự mình phán đoán xem có cần phải xử lí hay không).
+2. **Orchestration**: mỗi orchestrator (object) sẽ chỉ định cụ thể các local transactions sẽ được thực thi.
+
+### Choreography-based SAGA
+
+Tôi lấy ví dụ với một trang EC với 2 domains chính là **Order** và **Customer** lần lượt là:
+
+1. Nghiệp vụ diễn ra mỗi khi người dùng mua hàng.
+2. Nghiệp vụ liên quan đến khách hàng (người dùng).
