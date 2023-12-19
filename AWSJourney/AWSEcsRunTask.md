@@ -22,6 +22,7 @@ Giải pháp ở đây đó chính là SAGA, có thể hiểu đơn giản rằn
 Như hình minh hoạ dưới đây.
 
 ![Screen Shot 2023-12-11 at 23 33 51](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/1385f989-20dc-4afb-b732-c121b8b6bf72)
+_Hình 1_
 
 Có 2 cách triển khai SAGA:
 
@@ -38,6 +39,7 @@ Tôi lấy ví dụ với một trang EC với 2 domains chính là **Order** v�
 Follow triển khai order trên trang EC theo như choreography sẽ như sau:
 
 ![Screen Shot 2023-10-26 at 22 42 30](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/f9cdc07e-1fed-4e58-b1ef-4146cd6680b8)
+_Hình 2_
 
 1. `Order Service` nhận `POST /orders` request, tạo `order` với trạng thái là `PENDING`.
 2. Sau đó nó sẽ emit một `Order Created` event.
@@ -48,6 +50,7 @@ Follow triển khai order trên trang EC theo như choreography sẽ như sau:
 ### Orchestration-based SAGA
 
 ![Screen Shot 2023-10-27 at 7 44 42](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/0a36b90f-3124-4a32-9828-cda710ce6502)
+_Hình 3_
 
 Giải thích sơ qua về Orchestration-based như sau:
 
@@ -82,6 +85,7 @@ Vòng đời của một ECS application
 Trong đó:
 
 ![Screen Shot 2023-11-18 at 22 42 22](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/70305f62-d7d1-4eb2-9ee9-cddcdab3b854)
+_Hình 4_
 
 - ECR sẽ lưu DockerImage tương ứng với app.
 - Task Definition sẽ là blueprint của app (JSON file với các params, containers cấu thành nên app)
@@ -97,3 +101,316 @@ Còn "Task" sẽ "tự động" tắt đi sau khi nó hoàn thành "nhiệm vụ
 ### Kiến trúc sử dụng
 
 Ở đây tôi dựng nên những thành phần chính như hình bên dưới:
+
+![index](https://github.com/tuananhhedspibk/micro-nestjs/assets/15076665/46dd7f2b-d1a1-4f03-bb96-46b0690eb47a)
+_Hình 5_
+
+Giải thích để bạn đọc hiểu rõ hơn. Đối với mỗi service trong số các micro-services của mình, tôi đều tạo cho chúng một `aws-event-bus` riêng.
+
+Nói một cách đơn giản thì `aws-event-bus` là một dịch vụ của AWS, nó cho phép phía client có thể sử dụng các công cụ như:
+
+- aws-cli
+- aws-sdk
+
+để emit các events, các events này sau đó sẽ được `aws-event-bus` nhận về.
+
+Tất nhiên mỗi một event sẽ có một "đặc thù riêng", đặc thù này sẽ được AWS coi như một "Rule", từ đó dẫn tới khái niệm đi kèm với event-bus đó là **Event Rule**.
+
+Mỗi một bus sẽ có một hoặc nhiều rules gắn với nó. Khi phía service emit một event thì service cần chỉ định rõ ràng event này thuộc về rule nào.
+
+Dưới đây là code minh hoạ cho việc sử dụng aws-sdk để emit event lên event-bus
+
+```ts
+import {EventBridge} from "@aws-sdk/client-eventbridge";
+
+const client = new EventBridge({region: "ap-southeast-1"});
+
+client.putEvents({
+  EventBusName: "Service-A-Bus",
+  DetailType: "Service-A-Rule-1", // trường DetailType sẽ chỉ ra Rule mà event sẽ hướng đến
+  Detail: {
+    // dữ liệu đi kèm
+  },
+});
+```
+
+## Triển khai
+
+Tổng quan thì cách thức các micro-services trong hệ thống của tôi liên kết với nhau sẽ thông qua việc "Emitting event" như trên.
+
+Thế nhưng nếu chỉ dừng ở sơ đồ "chung chung" như vậy sẽ rất khó để bạn đọc hình dung một cách cụ thể về cơ chế hoạt động.
+
+Nên do đó trong phần này tôi xin phép được đi sâu hơn vào phần coding
+
+### event-bus && event-rules
+
+Ở đây để triển khai event-bus và event-rules, tôi sử dụng `aws-cdk` (nói qua thì đây cũng là một công cụ Infrastructure As Code do aws cung cấp).
+
+![Screen Shot 2023-12-19 at 22 25 40](https://github.com/tuananhhedspibk/restful-app/assets/15076665/5d92b8bf-5b96-40f7-a6f9-ea34bdd355d0)
+_Hình 6_
+
+Về bộ khung event-bus và event-rules, bạn có thể thấy
+
+- 1 event-bus - n event-rules
+- 1 Stack - n event-buses (stack ở đây có thể hiểu như một đơn vị dùng để deploy resources được định nghĩa bởi aws-cdk)
+
+Việc sử dụng **stack** ở đây sẽ giúp chúng ta nhóm các resources lại theo từng đơn vị (unit), từ đó giúp việc quản lí resources trở nên rõ ràng và "ngăn nắp" hơn thay vì quản lí các resoures theo một cấu trúc "flat"
+
+Với stack ta có:
+
+```txt
+stack1
+  → resource[1-1]
+  → resource[1-2]
+
+stack2
+  → resource[2-1]
+  → resource[2-2]
+```
+
+Với cấu trúc "flat", ta có:
+
+```txt
+resource[1]
+resource[2]
+...
+resource[n]
+```
+
+bạn có thể thấy rõ ràng sự "ngăn nắp" của việc sử dụng stack rồi chứ.
+
+#### Với stack
+
+Tôi sẽ khai báo một class như sau:
+
+```ts
+import {Stack} from "aws-cdk-lib";
+import {Construct} from "constructs";
+
+class TestStack extends Stack {
+  constructor(scope: Construct, id: string) {
+    super(scope, id, {
+      env: {
+        account: "aws-account-id",
+        region: "ap-southeast-1",
+      },
+    });
+
+    const eventBusB = new EventBusB(this, "EventBusB");
+
+    new EventRuleB1(this, "EventRuleB1", eventBusB.eventBus);
+  }
+}
+```
+
+#### Với event-bus
+
+Tôi sẽ khai báo một class như sau:
+
+```ts
+import {EventBus} from "aws-cdk-lib/aws-events";
+import {Construct} from "constructs";
+
+class EventBusB extends Construct {
+  public readonly eventBus: EventBus;
+
+  constructor(scope: Construct, id: string) {
+    super(scope, id); // scope ở đây chính là stack mà event-bus này thuộc về
+
+    this.eventBus = new EventBus(this, "EventBusB", {
+      eventBusName: "EventBusB",
+    });
+  }
+}
+```
+
+#### Với event-rule
+
+Tôi sẽ khai báo một class như sau:
+
+```ts
+import {EventBus, Rule} from "aws-cdk-lib/aws-events";
+import {StateMachine} from "aws-cdk-lib/aws-stepfunctions";
+import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+
+import * as targets from "aws-cdk-lib/aws-events-targets";
+
+import {Construct} from "constructs";
+
+class EventRuleB1 extends Construct {
+  constructor(scope: Construct, id: string, eventBus: EventBus) {
+    super(scope, id);
+
+    const ruleB1 = new Rule(this, "ruleB1", {
+      ruleName: "ruleB1",
+      description: "ruleB1 description",
+      eventBus, // chỉ định bus mà rule sẽ gắn vào
+      eventPattern: {
+        detailType: ["RuleB1 Detail Type"], // đây chính là "đặc trưng của rule", các event muốn map với rule phải chỉ định rõ giá trị của detailType
+      },
+    });
+
+    // định nghĩa state-machine chứa xử lí được trigger khi nhận event
+    const ruleB1StateMachine = new EventRuleB1StateMachine(
+      this,
+      "EventRuleB1StateMachine"
+    );
+
+    // gắn state-machine với event-rule
+    ruleB1.addTarget(
+      new targets.SfnStateMachine(ruleB1StateMachine.stateMachine, {
+        deadLetterQueue: null, // để đơn giản hoá tôi tạm chỉ định deadLetterQueue = null, deadLetterQueue có thể hiểu như nơi sẽ nhận về các error result và sẽ tiến hành retry lại xử lí bị failed trước đó
+      })
+    );
+  }
+}
+
+class EventRuleB1StateMachine extends Construct {
+  public readonly stateMachine: StateMachine;
+
+  constructor(scope: Construct, id: string) {
+    super(scope, id);
+
+    // khai báo một lambda function
+    // bản thân lambda func này sẽ chứa xử lí core được thực thi khi event được nhận
+    const checkStatusFn = new lambda.Function(this, "checkStatusFn", {
+      code: new lambda.InlineCode(
+        fs.readFileSync("lib/lambdas/check_status.py", {encoding: "utf-8"})
+      ),
+      handler: "index.main",
+      timeout: cdk.Duration.seconds(30),
+      runtime: lambda.Runtime.PYTHON_3_9,
+    });
+
+    // định nghĩa step-function sẽ gọi tới lambda function ở trên
+    const stateMachineJob = new tasks.LambdaInvoke(
+      this,
+      "EventRuleB1StateMachineJob",
+      {
+        lambdaFunction: checkStatusFn,
+        invocationType: tasks.LambdaInvocationType.EVENT,
+      }
+    );
+
+    // gắn step-function với state-machine
+    this.stateMachine = new StateMachine(this, "EventRuleB1StateMachine", {
+      definition: stateMachineJob,
+      stateMachineName: "EventRuleB1StateMachine",
+    });
+  }
+}
+```
+
+Như đoạn code ở trên bạn đọc có thể thấy thêm được 2 khái niệm khác được sử dụng ở đây đó là:
+
+- state-machine
+- step-function
+
+Nói nhanh thì state-machine là một "workflow" gồm nhiều "states" bên trong nó.
+
+Đại loại là như thế này:
+
+```txt
+StateMachine:
+
+state-1 → state-2 → state-3 → state-4 → ... → state-n
+```
+
+Còn step-function chính là công cụ để chúng ta thực thi (triển khai) từng state trong state-machine. Cụ thể hơn bạn đọc có thể tham khảo ở bài viết [này](https://viblo.asia/p/su-dung-aws-cdk-de-tao-stepfunction-statemachine-W13VM1l8VY7)
+
+Về mối liên hệ giữa event-rule, state-machine, step-function các bạn có thể xem hình dưới đây:
+
+![Screen Shot 2023-12-19 at 23 29 57](https://github.com/tuananhhedspibk/restful-app/assets/15076665/065068a4-1bd6-4058-bfd1-4f8c6283a6c4)
+_Hình 7_
+
+step-function như đã nói sẽ tiến hành implement (triển khai) state-machine
+
+state-machine sẽ gắn với event-rule và đóng vai trò như một xử lí sẽ được trigger khi event được nhận.
+
+Đây là một phần khá phức tạp, tôi mong bạn đọc sẽ đọc kĩ hơn phần code minh hoạ ở trên để hiểu rõ vấn đề.
+
+### Emit Event
+
+Thực chất đây là quá trình service sinh và gửi một event đi mà thôi.
+
+Rất đơn giản bằng cách sử dụng aws-sdk như sau:
+
+```ts
+import {EventBridge} from "@aws-sdk/client-eventbridge";
+
+const client = new EventBridge({region: "ap-southeast-1"});
+
+client.putEvents({
+  EventBusName: "Service-A-Bus",
+  DetailType: "Service-A-Rule-1", // trường DetailType sẽ chỉ ra Rule mà event sẽ hướng đến
+  Detail: {
+    // dữ liệu đi kèm
+  },
+});
+```
+
+Có một case-study là mỗi một service sẽ có riêng cho mình một event-bus, điều này thực ra là vô cùng hợp lí vì
+
+> Service KHÔNG CẦN PHẢI QUAN TÂM ĐẾN VIỆC event nó sinh ra sẽ được đưa đến đâu, mà công việc "vận chuyển" event này sẽ do một external-lib quyết định, service chỉ cần đảm bảo thực hiện đúng nghiệp vụ là đủ
+
+### Trigger task
+
+Đây chính là phần core của bài viết lần này, tiếp nối phần định nghĩa event-rule lần trước, các bạn có thể thấy event-rule sẽ gắn với state-machine và state-machine chính là xử lí được trigger khi nhận được event.
+
+Quay trở lại _Hình 5_ ở trên, bạn có thể thấy rằng việc trigger task thuộc về service khác sẽ do event-rule đảm nhận.
+
+Từ đó có thể suy luận ra rằng:
+
+> Việc trigger task sẽ do state-machine đảm nhận
+
+Lí thuyết là như vậy, trong thực tế code định nghĩa state-machine sẽ biến đổi đi như sau:
+
+```ts
+class EventRuleB1StateMachine extends Construct {
+  public readonly stateMachine: StateMachine;
+
+  constructor(scope: Construct, id: string) {
+    super(scope, id);
+
+    // định nghĩa step-function sẽ trigger task thuộc về một service khác
+    const stateMachineJob = new ecsTaskRun.setupStateMachineDefinition({
+      scope: this,
+      task: {
+        command: ["node", "serviceATaskA1.js"],
+        name: "serviceATaskA1",
+      },
+    });
+
+    // gắn step-function với state-machine
+    this.stateMachine = new StateMachine(this, "EventRuleB1StateMachine", {
+      definition: stateMachineJob,
+      stateMachineName: "EventRuleB1StateMachine",
+    });
+  }
+}
+```
+
+Đúng vậy, rất đơn giản thôi
+
+```ts
+const stateMachineJob = new ecsTaskRun.setupStateMachineDefinition({
+  scope: this,
+  task: {
+    command: ["node", "serviceATaskA1.js"],
+    name: "serviceATaskA1",
+  },
+});
+```
+
+chỉ có 7 dòng, nhưng những gì phức tạp nhất lại nằm trong hàm `setupStateMachineDefinition`. Cụ thể hơn xin mời bạn đọc chuyển sang phần tiếp theo.
+
+#### Môi trường local
+
+Lí do tôi chia thành 2 phần **Môi trường local** và **Môi trường aws** đó là vì môi trường phía aws-cloud đã được thiết lập trước đó bằng terraform, bạn đọc có thể tham khảo bài viết [này](https://viblo.asia/p/xay-dung-infra-aws-cho-micro-service-bang-terraform-W13VM1RdVY7) đễ rõ hơn.
+
+Còn môi trường dưới local được tôi giả lập lại bằng aws-cdk
+
+#### Môi trường aws
+
+ScreenShot
