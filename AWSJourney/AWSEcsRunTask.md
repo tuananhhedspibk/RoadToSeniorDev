@@ -127,9 +127,9 @@ const client = new EventBridge({region: "ap-southeast-1"});
 
 client.putEvents({
   EventBusName: "Service-A-Bus",
-  DetailType: "Service-A-Rule-1", // trường DetailType sẽ chỉ ra Rule mà event sẽ hướng đến
+  DetailType: "Service-A-Rule-1", // Trường DetailType sẽ chỉ ra Rule mà event sẽ hướng đến
   Detail: {
-    // dữ liệu đi kèm
+    // Dữ liệu đi kèm
   },
 });
 ```
@@ -215,7 +215,7 @@ class EventBusB extends Construct {
   public readonly eventBus: EventBus;
 
   constructor(scope: Construct, id: string) {
-    super(scope, id); // scope ở đây chính là stack mà event-bus này thuộc về
+    super(scope, id); // Scope ở đây chính là stack mà event-bus này thuộc về
 
     this.eventBus = new EventBus(this, "EventBusB", {
       eventBusName: "EventBusB",
@@ -245,13 +245,13 @@ class EventRuleB1 extends Construct {
     const ruleB1 = new Rule(this, "ruleB1", {
       ruleName: "ruleB1",
       description: "ruleB1 description",
-      eventBus, // chỉ định bus mà rule sẽ gắn vào
+      eventBus, // Chỉ định bus mà rule sẽ gắn vào
       eventPattern: {
-        detailType: ["RuleB1 Detail Type"], // đây chính là "đặc trưng của rule", các event muốn map với rule phải chỉ định rõ giá trị của detailType
+        detailType: ["RuleB1 Detail Type"], // Đây chính là "đặc trưng của rule", các event muốn map với rule phải chỉ định rõ giá trị của detailType
       },
     });
 
-    // định nghĩa state-machine chứa xử lí được trigger khi nhận event
+    // Định nghĩa state-machine chứa xử lí được trigger khi nhận event
     const ruleB1StateMachine = new EventRuleB1StateMachine(
       this,
       "EventRuleB1StateMachine"
@@ -260,7 +260,7 @@ class EventRuleB1 extends Construct {
     // gắn state-machine với event-rule
     ruleB1.addTarget(
       new targets.SfnStateMachine(ruleB1StateMachine.stateMachine, {
-        deadLetterQueue: null, // để đơn giản hoá tôi tạm chỉ định deadLetterQueue = null, deadLetterQueue có thể hiểu như nơi sẽ nhận về các error result và sẽ tiến hành retry lại xử lí bị failed trước đó
+        deadLetterQueue: null, // Để đơn giản hoá tôi tạm chỉ định deadLetterQueue = null, deadLetterQueue có thể hiểu như nơi sẽ nhận về các error result và sẽ tiến hành retry lại xử lí bị failed trước đó
       })
     );
   }
@@ -272,8 +272,8 @@ class EventRuleB1StateMachine extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    // khai báo một lambda function
-    // bản thân lambda func này sẽ chứa xử lí core được thực thi khi event được nhận
+    // Khai báo một lambda function
+    // Bản thân lambda func này sẽ chứa xử lí core được thực thi khi event được nhận
     const checkStatusFn = new lambda.Function(this, "checkStatusFn", {
       code: new lambda.InlineCode(
         fs.readFileSync("lib/lambdas/check_status.py", {encoding: "utf-8"})
@@ -283,7 +283,7 @@ class EventRuleB1StateMachine extends Construct {
       runtime: lambda.Runtime.PYTHON_3_9,
     });
 
-    // định nghĩa step-function sẽ gọi tới lambda function ở trên
+    // Định nghĩa step-function sẽ gọi tới lambda function ở trên
     const stateMachineJob = new tasks.LambdaInvoke(
       this,
       "EventRuleB1StateMachineJob",
@@ -293,7 +293,7 @@ class EventRuleB1StateMachine extends Construct {
       }
     );
 
-    // gắn step-function với state-machine
+    // Gắn step-function với state-machine
     this.stateMachine = new StateMachine(this, "EventRuleB1StateMachine", {
       definition: stateMachineJob,
       stateMachineName: "EventRuleB1StateMachine",
@@ -343,9 +343,9 @@ const client = new EventBridge({region: "ap-southeast-1"});
 
 client.putEvents({
   EventBusName: "Service-A-Bus",
-  DetailType: "Service-A-Rule-1", // trường DetailType sẽ chỉ ra Rule mà event sẽ hướng đến
+  DetailType: "Service-A-Rule-1", // Trường DetailType sẽ chỉ ra Rule mà event sẽ hướng đến
   Detail: {
-    // dữ liệu đi kèm
+    // Dữ liệu đi kèm
   },
 });
 ```
@@ -373,7 +373,7 @@ class EventRuleB1StateMachine extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    // định nghĩa step-function sẽ trigger task thuộc về một service khác
+    // Định nghĩa step-function sẽ trigger task thuộc về một service khác
     const stateMachineJob = new ecsTaskRun.setupStateMachineDefinition({
       scope: this,
       task: {
@@ -382,7 +382,7 @@ class EventRuleB1StateMachine extends Construct {
       },
     });
 
-    // gắn step-function với state-machine
+    // Gắn step-function với state-machine
     this.stateMachine = new StateMachine(this, "EventRuleB1StateMachine", {
       definition: stateMachineJob,
       stateMachineName: "EventRuleB1StateMachine",
@@ -409,7 +409,75 @@ chỉ có 7 dòng, nhưng những gì phức tạp nhất lại nằm trong hàm
 
 Lí do tôi chia thành 2 phần **Môi trường local** và **Môi trường aws** đó là vì môi trường phía aws-cloud đã được thiết lập trước đó bằng terraform, bạn đọc có thể tham khảo bài viết [này](https://viblo.asia/p/xay-dung-infra-aws-cho-micro-service-bang-terraform-W13VM1RdVY7) đễ rõ hơn.
 
-Còn môi trường dưới local được tôi giả lập lại bằng aws-cdk
+Còn môi trường dưới local được tôi giả lập lại bằng aws-cdk theo mô hình dưới đây
+
+![index (1)](https://github.com/tuananhhedspibk/DataIntensiveApp/assets/15076665/2c435c23-f5fd-4c97-8d9c-684429557d2f)
+_Hình 8_
+
+Như tôi đã viết ở phần trước, sau khi event được chuyển đến event-rule, xử lí trong state-machine sẽ được kích hoạt (tham chiếu theo _Hình 8_ phía trên thì xử lí từ bước 2 trở đi sẽ hoạt động).
+
+Tại bước 2 này, tôi sẽ tạo ra một task-definition (do nó chính là blue-print để từ đó khởi động nên ecs-task).
+
+task-definition này sẽ mount đến source code của service bên kia (ở đây tôi gọi là service B), việc mount này là cần thiết vì sau này khi ECS task của service B được kích hoạt nó sẽ được chạy dưới dạng một **docker-container** do đó ta cần mount sang source code của service B.
+
+Sau khi quá trình mount của task-definition xong thì cũng là lúc task-defintion của tôi đã được định nghĩa hoàn chỉnh. Lúc này tôi sẽ tiến hành "khởi động" một ecs-task (bước 4).
+
+ecs-task sau khi được khởi động xong sẽ được apply một command (hay nói cách khác bản chất ở đây chỉ là việc chạy một command lên ecs-task mà thôi) để trigger một use-case nào đó bên phía service B.
+
+Phần source-code sẽ như sau:
+
+```ts
+import {
+  Vpc,
+  IpAddresses,
+  SubnetType,
+  CfnRouteTable,
+  CfnSubnetRouteTableAssociation,
+  InstanceType,
+} from "aws-cdk-lib/aws-ec2";
+import {Compatibility} from "aws-cdk-lib/aws-ecs";
+
+// Định nghĩa một VPC dùng chung
+const vpc = new Vpc(scope, "vpc-id", {
+  ipAddresses: IpAddresses.cidr("10.0.0.0/16"),
+  subnetConfiguration: [
+    {
+      cidrMask: 24,
+      name: "ingress",
+      subnetType: SubnetType.PUBLIC, // Để đơn giản, dưới local tôi chỉ sử dụng public-subnet
+    },
+  ],
+});
+
+// Định nghĩa route-table cho public-subnet
+const publicRouteTable = new CfnRouteTable(scope, "public-route-table-id", {
+  vpcId: vpc.vpcId,
+});
+
+// Định nghĩa ecs-cluster dùng chung
+const ecsCluster = new Cluster(scope, "ecs-cluster", {
+  vpc: vpc,
+});
+this.ecsCluster.addCapacity("ecs-cluster-autoScaling-group", {
+  instanceType: new InstanceType("t2.micro"),
+  vpcSubnets: {subnetType: SubnetType.PUBLIC},
+});
+
+// Định nghĩa task-defintion
+const taskDefinition = new TaskDefinition(scope, "task-definition", {
+  compatibility: Compatibility.EC2,
+});
+
+const ecsContainer = task.definition.addContainer(ecsInfo.id, {
+  image: ContainerImage.fromAsset(ecsInfo.assetPath, {
+    file: ecsInfo.dockerfilePath || EcsDefaultConfig.DockerfilePath,
+  }),
+  memoryLimitMiB: ecsInfo.memoryLimit || EcsDefaultConfig.MemoryLimit,
+  cpu: ecsInfo.cpu || EcsDefaultConfig.Cpu,
+  command: task.command,
+  containerName: ecsInfo.name,
+});
+```
 
 #### Môi trường aws
 
