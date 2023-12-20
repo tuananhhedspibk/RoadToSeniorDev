@@ -565,9 +565,8 @@ new CustomState(scope, "task", {
           {
             Name: "container-name",
             Command: "node usecase_b1.js",
-            Memory:
-              containerOverride.memoryLimit || EcsDefaultConfig.MemoryLimit,
-            Cpu: containerOverride.cpu || EcsDefaultConfig.Cpu,
+            Memory: "512",
+            Cpu: "256",
             Environment: [
               {
                 Name: "eventDetail",
