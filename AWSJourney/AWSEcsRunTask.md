@@ -434,8 +434,11 @@ import {
   CfnRouteTable,
   CfnSubnetRouteTableAssociation,
   InstanceType,
+  PlacementStrategy,
 } from "aws-cdk-lib/aws-ec2";
 import {Compatibility} from "aws-cdk-lib/aws-ecs";
+
+import {EcsRunTask} from "aws-cdk-lib/aws-stepfunctions-tasks";
 
 // Định nghĩa một VPC dùng chung
 const vpc = new Vpc(scope, "vpc-id", {
@@ -458,7 +461,7 @@ const publicRouteTable = new CfnRouteTable(scope, "public-route-table-id", {
 const ecsCluster = new Cluster(scope, "ecs-cluster", {
   vpc: vpc,
 });
-this.ecsCluster.addCapacity("ecs-cluster-autoScaling-group", {
+ecsCluster.addCapacity("ecs-cluster-autoScaling-group", {
   instanceType: new InstanceType("t2.micro"),
   vpcSubnets: {subnetType: SubnetType.PUBLIC},
 });
@@ -468,17 +471,127 @@ const taskDefinition = new TaskDefinition(scope, "task-definition", {
   compatibility: Compatibility.EC2,
 });
 
-const ecsContainer = task.definition.addContainer(ecsInfo.id, {
-  image: ContainerImage.fromAsset(ecsInfo.assetPath, {
-    file: ecsInfo.dockerfilePath || EcsDefaultConfig.DockerfilePath,
+// Đây là bước tiến hành mount task-definition với source code của service phía bên kia
+// source code của service phía bên kia sẽ được coi như asset của task-definition
+const ecsContainer = task.definition.addContainer("ecs_id", {
+  image: ContainerImage.fromAsset("./serviceB_source_path", {
+    file: "./service_B_dockerfile_path",
   }),
-  memoryLimitMiB: ecsInfo.memoryLimit || EcsDefaultConfig.MemoryLimit,
-  cpu: ecsInfo.cpu || EcsDefaultConfig.Cpu,
-  command: task.command,
-  containerName: ecsInfo.name,
+  memoryLimitMiB: 512,
+  cpu: 128,
+  command: "node usecase_b1.js",
+  containerName: "serviceB_container",
+});
+
+// Bật ecs-task lên và chạy
+new EcsRunTask(scope, "usecase_b1_task", {
+  integrationPattern: IntegrationPattern.RUN_JOB,
+  cluster: ecsCluster,
+  containerOverrides: [
+    {
+      containerDefinition: ecsContainer,
+      command: task.command,
+      environment: [
+        // Truyền toàn bộ dữ liệu nằm trong trường detail của emitted event sang cho service bên kia dưới dạng command-param
+        {
+          name: "eventDetail",
+          value: JsonPath.stringAt("$.detail"),
+        },
+      ],
+    },
+  ],
+  taskDefinition: task.definition,
+  launchTarget: new EcsEc2LaunchTarget({
+    placementStrategies: [
+      PlacementStrategy.spreadAcrossInstances(),
+      PlacementStrategy.packedByCpu(),
+      PlacementStrategy.randomly(),
+    ],
+  }),
 });
 ```
 
 #### Môi trường aws
 
-ScreenShot
+Với môi trường aws-cloud sẽ có một vài sự khác biệt so với local, nguyên nhân là bởi thay vì dựng một flow hoàn chỉnh từ đầu bằng aws-cdk, với aws-cloud tôi sử dụng những resources đã được tạo sẵn từ trước (vpc, ecs-cluster, ...).
+
+Thế nhưng dù là môi trường local hay aws-cloud thì ta vẫn cần phải có **task-definition**, tất nhiên task-defintion đã được định nghĩa sẵn từ trước trên aws-cloud.
+
+Một cách tự nhiên ai cũng nghĩ rằng chúng ta có thể lấy về task-definiton đã định nghĩa trước đó bằng aws-cdk và sau đó chỉ việc chạy `new EcsRunTask()` giống như dưới local là xong. Nói chung trông nó sẽ như thế này:
+
+```ts
+const importTaskdef = TaskDefinition.fromTaskDefinitionArn(
+  this,
+  "importedTaskdef",
+  "arn của task-definition sẵn có"
+);
+const step1State = new EcsRunTask(this, "Step1 RunEcsTask", {
+  cluster: clusterArn,
+  taskDefinition: importTaskdef,
+});
+```
+
+Thế nhưng có một sự "xung đột" về kiểu ở đây đó là `fromTaskDefinitionArn` trả về kiểu `ITaskDefinition` trong khi `EcsRunTask` lại yêu cầu `TaskDefinition`.
+
+Do đó ở đây ta phải sử dụng **CustomState** - <https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_stepfunctions.CustomState.html>
+
+Đây là một cách chúng ta "định nghĩa lại" State trong state-machine, nói cách khác, chính là việc chúng ta định nghĩa lại follow này:
+
+![Screen Shot 2023-12-20 at 23 21 55](https://github.com/tuananhhedspibk/DataIntensiveApp/assets/15076665/e6ce32b1-e8a5-4935-830e-9f304b1d1648)
+_Hình 9_
+
+bằng ASL (Amazon State Language) - nói nhanh thì đây là một ngôn ngữ JSON-based để định nghĩa các states trong state-machine (cụ thể hơn bạn đọc có thể tham khảo tại <https://docs.aws.amazon.com/step-functions/latest/dg/concepts-amazon-states-language.html>)
+
+Tôi đã áp dụng nó như sau:
+
+```ts
+import {CustomState} from "aws-cdk-lib/aws-stepfunctions";
+new CustomState(scope, "task", {
+  stateJson: {
+    Type: "Task",
+    Resource: "arn:aws:states:::ecs:runTask",
+    Parameters: {
+      LaunchType: "FARGATE",
+      Cluster: ecsCluster.clusterArn,
+      TaskDefinition: task.definitionArn,
+      NetworkConfiguration: {
+        AwsvpcConfiguration: {
+          Subnets: subnetIds,
+          SecurityGroups: securityGroupIds,
+        },
+      },
+      Overrides: {
+        ContainerOverrides: [
+          {
+            Name: "container-name",
+            Command: "node usecase_b1.js",
+            Memory:
+              containerOverride.memoryLimit || EcsDefaultConfig.MemoryLimit,
+            Cpu: containerOverride.cpu || EcsDefaultConfig.Cpu,
+            Environment: [
+              {
+                Name: "eventDetail",
+                // convert detail từ JSON data sang command param dưới dạng string
+                "Value.$": "States.JsonToString($.detail)",
+              },
+            ],
+          },
+        ],
+      },
+    },
+  },
+});
+```
+
+Và đây là khoảnh khắc khi một event được emit
+
+![Screenshot 2023-08-20 at 22 04 13](https://github.com/tuananhhedspibk/DataIntensiveApp/assets/15076665/061ce7f8-2bfa-41c8-85e0-26c8fae96c30)
+_Hình 10_
+
+Bạn đọc có thể thấy rằng các task sẽ được dựng nên và cũng sẽ tự tắt đi khi hoàn thành xong một nghiệp vụ.
+
+## Kết
+
+Bài viết khá dài và khá khó nhưng tôi hi vọng rằng với những ai đang có ý định triển khai micro-service thì đây sẽ là một tư liệu tham khảo hữu ích nếu các bạn còn đang phân vân về cách thức liên lạc giữa các services cũng như cách triển khai transaction trên nhiều services.
+
+Cảm ơn bạn đọc đã ủng hộ, hẹn gặp lại ở các bài viết tiếp theo.
