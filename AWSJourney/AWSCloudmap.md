@@ -1,3 +1,3 @@
 # AWS Cloudmap
 
-![ANS Cloud Map](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/0a602f4f-874a-406c-9e99-d87524a5e00c)
+![ANS Cloud Map](https://github.com/tuananhhedspibk/RoadToSeniorDev/assets/15076665/570de250-b3b8-4f46-8a68-56619802a501)
