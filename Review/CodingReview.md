@@ -1,6 +1,6 @@
 # How To Do Code Reviews Properly
 
-Link: https://medium.com/@techworldwithmilan/how-to-do-code-reviews-properly-9fa59d932990
+Link: <https://medium.com/@techworldwithmilan/how-to-do-code-reviews-properly-9fa59d932990>
 
 Những lợi ích của code review:
 
@@ -72,4 +72,20 @@ Thank you for your contribution to this repo. Before submitting this PR, please 
 
 Các công cụ như BitBucket, Github sẽ hỗ trợ rất nhiều cho việc review.
 
-## Thay đổi để review code tốt hơn 
+## Thay đổi để review code tốt hơn
+
+Một cách khác giúp tăng chất lượng review code tốt hơn đó là dựa theo model, cách làm này gọi là `Trunk-based development`. Có thể hiểu một cách đơn giản đó là việc thực hiện `Collaborative programming` - `Pair & Mob programming`.
+
+Đây là cách làm mà hai hay nhiều dev sẽ cùng làm việc trên một task, share ideas thông qua việc viết code.
+
+Trong cách tiếp cận này, một người sẽ là `driver - viết code`, một người sẽ là `navigator - đảm bảo chất lượng code`, hai người này sẽ hoán đổi vai trò cho nhau trong quá trình làm việc.
+
+Cách làm này đem lại một vài lợi ích so với các cách review code truyền thống:
+
+- **Real-time feedback**: pair & mob programming giúp dev có khả năng feedback và nhận feedback gần như ngay lập tức thay vì phải chờ đợi sau khi quá trình review code kết thúc.
+- **Knowledge sharing**: cho phép dev có thể học được kiến thức, kinh nghiệm từ các dev khác. Điều này đặc biệt tốt với `newbie` hoặc khi làm việc với `new technology`. Không những thế cũng tránh được việc một member bị quá tải.
+- **Giải quyết vấn đề nhanh hơn**
+- **Tăng khả năng tập trung và hiệu suất làm việc**
+- **Cải thiện chất lượng code**: khi có nhiều dev làm việc cùng nhau thì việc bắt lỗi cũng như phát hiện các vấn đề cũng sẽ dễ hơn.
+
+Cách làm này chỉ tốt với các team **có nhiều senior dev - có khả năng giải quyết vấn đề nhanh**. Pull Request Model truyền thống vẫn rất ổn với các team có juniors hoặc các sản phẩm phức tạp.
