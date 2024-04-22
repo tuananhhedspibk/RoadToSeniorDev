@@ -75,6 +75,17 @@ HTTP/2 sử dụng một kiểu dữ liệu do Google phát minh đó là `Proto
 
 Một chú ý khác đó là gRPC nên dùng cho giao tiếp giữa `backend - backend` thay vì `backend-frontend` do việc giao tiếp stateful giữa `backend-frontend` sẽ gây ra các vấn đề "scale tải" hoặc "HOL"
 
+## Kết phần 1
+
+Trong phần này tôi đã trình bày với bạn đọc:
+
+- Khái niệm về RPC
+- Sự khác biệt giữa RPC và REST
+- Tổng quan về gRPC framework
+- Áp dụng gRPC trong thực tế
+
+Hi vọng bạn đọc đã hiểu được phần nào về gRPC để có thể tiếp tục theo dõi các phần tiếp theo trong series lần này. Hẹn gặp lại.
+
 ## Tham khảo
 
 1. <https://200lab.io/blog/grpc-la-gi/>
