@@ -1,10 +1,15 @@
 # Ghi chép nhanh về gRPC
 
-Thao khảo từ: <https://200lab.io/blog/grpc-la-gi/>
+Thao khảo từ:
+
+1. <https://200lab.io/blog/grpc-la-gi/>
+2. <https://medium.com/javarevisited/what-is-grpc-is-it-better-than-rest-api-58a3b7aff13a>
 
 ## RPC là gì
 
 RPC là tên viết tắt của "Remote Procedure Call" - lời gọi thủ tục từ xa. Có thể hiểu nó giống như việc **gọi 1 hàm của server từ phía client**.
+
+RPC chỉ sử dụng POST và GET method. Tương tác giữa client và server sẽ thông qua `Server-side Interface` và `Client-side stub`
 
 ## Khác biệt giữa RPC và REST
 
@@ -30,6 +35,25 @@ Lấy ví dụ:
 Trong thực tế thì RPC sẽ được triển khai dựa trên REST nên ta có khái niệm **RPC-base APIs**.
 
 ![Screen Shot 2023-09-23 at 16 02 24](https://github.com/tuananhhedspibk/DDD-Modeling/assets/15076665/ac2567e6-f17c-4de4-986a-c4c07855a780)
+
+## gRPC là gì? Nó có gì khác biệt
+
+> gRPC là một open source remote procedure call (RPC) framework có thể chạy ở bất kì đâu. Nó cho phép client và server app có thể tương tác một cách "minh bạch".
+
+gRPC là một framework được phát triển bởi Google. Giống như các hệ thống RPCm gRPC cũng định nghĩa interface - bản thân interface này cũng định nghĩa các methods mà client có thể truy cập.
+
+Mặc định gRPC sử dụng protocol buffers như một `Interface Definition Language` & data exchange format. gRPC hỗ trợ các format như JSON.
+
+File `Interface Defintiion Language` trong gRPC được định nghĩa bởi file có extension là `.prot`.
+
+> Chúng ta hoàn toàn có thể quản lí file này dựa theo version.
+
+Các loại RPC mà gRPC hỗ trợ gồm:
+
+1. **Unary**: Single request từ client - Single response từ server.
+2. **Server streaming**: Single request từ client, stream messages trả về từ server.
+3. **Client Streaming**: Stream messages từ client và trả về single response từ server.
+4. **Bidirectional streaming**: Cả client và server đều gửi stream messages.
 
 ## gRPC được áp dụng trong thực tế như thế nào
 
