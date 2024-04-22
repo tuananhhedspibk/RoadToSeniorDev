@@ -1,11 +1,17 @@
-# Ghi chép nhanh về gRPC
+# Xây dựng Micro-service với gRPC
 
-Thao khảo từ:
+Tiếp nối series về DDD, tôi xin phép được giới thiệu với bạn đọc một series nữa, lần này không phải về DDD mà là về Micro-service.
 
-1. <https://200lab.io/blog/grpc-la-gi/>
-2. <https://medium.com/javarevisited/what-is-grpc-is-it-better-than-rest-api-58a3b7aff13a>
+Trong series này tôi muốn chia sẻ với bạn đọc cách xây dựng micro-service bằng giao thức gRPC thông qua một project nho nhỏ. Về cơ bản series sẽ gồm các bài viết như sau:
 
-## RPC là gì
+Bài 1. Tổng quan về gRPC.
+Bài 2. Giới thiệu về cấu trúc project.
+Bài 3,4,5. Triển khai các services.
+Bài 6. Tổng kết.
+
+Rất mong được bạn đọc đón nhận nồng nhiệt. Không chần chừ nữa, sau đây tôi sẽ đi vào bài đầu tiên đó là "Tổng quan về gRPC".
+
+## RPC là gì?
 
 RPC là tên viết tắt của "Remote Procedure Call" - lời gọi thủ tục từ xa. Có thể hiểu nó giống như việc **gọi một hàm của server từ phía client**.
 
@@ -68,3 +74,8 @@ HTTP/2 sử dụng một kiểu dữ liệu do Google phát minh đó là `Proto
 ![Screen Shot 2023-09-23 at 16 07 14](https://github.com/tuananhhedspibk/DDD-Modeling/assets/15076665/2600ac80-975d-47f4-9fd0-626dc07f62e1)
 
 Một chú ý khác đó là gRPC nên dùng cho giao tiếp giữa `backend - backend` thay vì `backend-frontend` do việc giao tiếp stateful giữa `backend-frontend` sẽ gây ra các vấn đề "scale tải" hoặc "HOL"
+
+## Tham khảo
+
+1. <https://200lab.io/blog/grpc-la-gi/>
+2. <https://medium.com/javarevisited/what-is-grpc-is-it-better-than-rest-api-58a3b7aff13a>
