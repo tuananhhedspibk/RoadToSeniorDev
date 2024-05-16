@@ -93,3 +93,82 @@ như đã nói chi tiết ở phần **Logging Policy** phía trên.
 - How: Tuỳ vào phương thức xác thực mà có sự khác biệt
 
 ## Ví dụ minh hoạ
+
+Lí thuyết như vậy là đủ, giờ chúng ta hãy cùng nhau thử triển khai nó trong một project đơn giản. Bạn đọc có thể tham khảo source code tại: <https://github.com/tuananhhedspibk/NewAnigram-BE-DDD>
+
+### Lựa chọn thư viện log
+
+Ở đây tôi sẽ sử dụng thư viện `log4js` (<https://github.com/log4js-node/log4js-node>). Lí do rất đơn giản vì bản thân log4js cũng tổ chức hệ thống phân cấp log của mình giống như tư tưởng mà tôi đã trình bày trong phần `Log level` ở trên.
+
+### Triển khai
+
+#### Bước 1 - Định nghĩa class Logger
+
+Đầu tiên tôi sẽ định nghĩa một class Logger riêng như sau:
+
+```ts
+class Logger {
+  public default: log4js.Logger;
+  public system: log4js.Logger;
+  public api: log4js.Logger;
+  public access_req: log4js.Logger;
+  public access_res: log4js.Logger;
+  public sql: log4js.Logger;
+  public auth: log4js.Logger;
+
+  public fatal: log4js.Logger;
+  public error: log4js.Logger;
+  public warn: log4js.Logger;
+  public info: log4js.Logger;
+  public debug: log4js.Logger;
+  public trace: log4js.Logger;
+
+  constructor() {
+    log4js.configure(loggerConfig);
+
+    this.system = log4js.getLogger('system');
+    this.api = log4js.getLogger('api');
+    this.access_req = log4js.getLogger('access_req');
+    this.access_res = log4js.getLogger('access_res');
+    this.sql = log4js.getLogger('sql');
+    this.auth = log4js.getLogger('auth');
+
+    this.fatal = log4js.getLogger('fatal');
+    this.fatal.level = log4js.levels.FATAL;
+
+    this.error = log4js.getLogger('error');
+    this.error.level = log4js.levels.ERROR;
+
+    this.warn = log4js.getLogger('warn');
+    this.warn.level = log4js.levels.WARN;
+
+    this.info = log4js.getLogger('info');
+    this.info.level = log4js.levels.INFO;
+
+    this.debug = log4js.getLogger('debug');
+    this.debug.level = log4js.levels.DEBUG;
+
+    this.trace = log4js.getLogger('trace');
+    this.trace.level = log4js.levels.TRACE;
+  }
+}
+```
+
+Tôi định nghĩa bên trong class Logger các `Log Levels` như:
+
+- fatal
+- error
+- debug
+- ...
+
+ngoài ra còn có các `Log Types` như:
+
+- system
+- api
+- access_req
+- access_res
+- ...
+
+#### Bước 2 - "Áp" Logger vào project
+
+Do project
