@@ -169,6 +169,177 @@ ngoài ra còn có các `Log Types` như:
 - access_res
 - ...
 
-#### Bước 2 - "Áp" Logger vào project
+#### Bước 2 - "Áp dụng" Logger vào project
 
-Do project
+Project lần này tôi sử dụng framework NestJS để triển khai. Tôi sẽ áp dụng Logger vào project của mình dưới hình thức một "Interceptor", cụ thể hơn về "Interceptor" trong NestJS bạn đọc có thể tham khảo bài viết dưới đây của tôi để biết thêm chi tiết:
+
+<https://viblo.asia/p/cac-concepts-co-ban-trong-nestjs-aAY4qepK4Pw>
+
+Lí do tôi chọn "Interceptor" là hình thức triển khai log là do "Interceptor" có thể "bao ngoài" `request stream` cũng như `response stream` đến và đi từ API nên sử dụng Interceptor là cách dễ dàng nhất để có thể bắt được `request log` và `response log`. Tôi định nghĩa `LoggerInterceptor class` như sau:
+
+```ts
+export class LoggerInterceptor implements NestInterceptor {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler<any>
+  ): Observable<any> | Promise<Observable<any>> {
+    // intercept() method sẽ "bao ngoài" request/ response stream
+
+    /*
+     * Lấy request object từ context
+     * Sau đó cho request object đi qua hàm hiển thị log là "requestLogger"
+     */
+    const request = context.switchToHttp().getRequest();
+    requestLogger(request);
+
+    /*
+     * Lấy response object từ context
+     * Sau đó cho response object đi qua hàm hiển thị log là "responseLogger" & "responseErrorLogger"
+     */
+    const response = context.switchToHttp().getResponse();
+
+    return next.handle().pipe(
+      // 200 - Success Response
+      map((data) => {
+        responseLogger({ requestId: request._id, response, data });
+      }),
+      // 4xx, 5xx - Error Response
+      tap(null, (exception: HttpException | Error) => {
+        try {
+          responseErrorLogger({ requestId: request._id, exception });
+        } catch (e) {
+          logger.access_res.error(e);
+        }
+      })
+    );
+  }
+}
+```
+
+bạn đọc có thể tham khảo chi tiết hơn tại đường dẫn sau: <https://github.com/tuananhhedspibk/restful-app/blob/main/libs/interceptor/logger/index.ts>
+
+Tôi định nghĩa 3 methods:
+
+- requestLogger
+- responseLogger
+- responseErrorLogger
+
+lần lượt như sau:
+
+```ts
+export const requestLogger = (request: Request) => {
+  const { ip, originalUrl, method, params, query, body, headers } = request;
+
+  // logTemplate sẽ bao gồm: now(thời gian) ip method url request_object
+  const logTemplate = '%s %s %s %s %s';
+  const now = dayjs().format('YYYY-MM-DD HH:mm:ss.SSS');
+
+  const logContent = util.formatWithOptions(
+    { colors: true },
+    logTemplate,
+    now,
+    ip,
+    method,
+    originalUrl,
+    JSON.stringify({
+      method,
+      url: originalUrl,
+      userAgent: headers['user-agent'],
+      body: _maskFields(body, 'password'),
+      params,
+      query,
+    })
+  );
+
+  // Gọi đến access_req logger object đã được định nghĩa trước đó
+  logger.access_req.info(logContent);
+};
+
+// Hiển thị success response log
+export const responseLogger = (input: {
+  requestId: number;
+  response: Response;
+  data: any;
+}) => {
+  const { requestId, response, data } = input;
+
+  const log: ResponseLog = {
+    requestId,
+    statusCode: response.statusCode,
+    data,
+  };
+
+  // Gọi đến access_res logger object đã được định nghĩa trước đó
+  logger.access_res.info(JSON.stringify(log));
+};
+
+// Hiển thị error response log
+export const responseErrorLogger = (input: {
+  requestId: number;
+  exception: HttpException | Error;
+}) => {
+  const { requestId, exception } = input;
+
+  const log: ResponseLog = {
+    requestId,
+    statusCode:
+      exception instanceof HttpException ? exception.getStatus() : null,
+    message: exception?.stack || exception?.message,
+  };
+
+  // Gọi đến access_res logger object đã được định nghĩa trước đó
+  logger.access_res.info(JSON.stringify(log));
+  logger.access_res.error(exception);
+};
+```
+
+bạn đọc có thể tham khảo cụ thể hơn tại đường dẫn sau: <https://github.com/tuananhhedspibk/restful-app/blob/main/libs/middleware/logger/index.ts>
+
+Sau khi đã định nghĩa xong "LoggerInterceptor" cũng các methods bổ trợ, tôi sẽ "apply" interceptor này vào main app của mình như sau:
+
+```ts
+const app = await NestFactory.create(AppModule);
+
+app.useGlobalInterceptors(new LoggerInterceptor());
+```
+
+rất đơn giản vì đây là một tính năng sẵn có của framework NestJS, cụ thể hơn về source code bạn đọc có thể tham khảo tại đây: <https://github.com/tuananhhedspibk/restful-app/blob/main/src/main.ts>
+
+Vậy thì với `fatal` hay `debug` log thì sao ? Các loại log này sẽ được tôi sử dụng trong tầng nghiệp vụ (usecase) hoặc tầng infrastructure với các mục đích:
+
+- Thông báo các lỗi mang tính "chí mạng" như việc kết nối tới DB bị "ngắt".
+- Có cơ sở để debug nếu user gặp lỗi.
+
+Rất đơn giản thôi, chỉ cần làm như sau là được
+
+```ts
+logger.fatal.error('Error message');
+```
+
+Bạn đọc có thể tham khảo một ví dụ tại: <https://github.com/tuananhhedspibk/restful-app/blob/main/src/users/application/command/signup/handler.ts#L35>
+
+Và đây là kết quả:
+
+Đầu tiên là với `access request log` và `response log` (khi không xảy ra lỗi)
+
+![Screenshot 2024-05-16 at 23 05 12](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/80eba6d1-bc8b-4dc0-ac90-ccb04da67840)
+
+bạn đọc có thể thấy các thông tin liên quan đến request như `method`, `body`, .. cũng như thông tin liên quan đến response là `statusCode` đều được hiển thị rõ ràng.
+
+Còn trong trường hợp xảy ra lỗi:
+
+![Screenshot 2024-05-16 at 23 05 26](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/20c65d40-8941-495d-ae53-5bf92959ee0e)
+
+thì loại lỗi, error message cũng đều được hiển thị.
+
+Tiếp theo là `fatal log` sẽ như sau:
+
+![Screenshot 2024-05-16 at 23 09 21](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/4e9a06ca-8c65-4f2a-970c-571981e78bf4)
+
+error message và error stack cũng được show ra.
+
+## Tổng kết
+
+Vậy là trong bài viết lần này tôi đã chia sẻ được với bạn đọc cách thức thiết kế cũng như triển khai một hệ thống logging cơ bản. Ví dụ minh hoạ lần này không quá phức tạp nhưng tôi hi vọng rằng bạn đọc có thể hiểu được tầm quan trọng cũng như sự cần thiết của việc xây dựng một hệ thống log "chỉnh chu" sẽ giúp ích rất nhiều trong quá trình vận hành một hệ thống thực tế đặc biệt là khi hệ thống gặp lỗi hoặc trục trặc.
+
+Cảm ơn bạn đọc đã đón nhận, xin hẹn gặp lại ở các bài viết tiếp theo. Happy coding.
