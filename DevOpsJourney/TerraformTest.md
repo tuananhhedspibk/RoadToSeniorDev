@@ -58,6 +58,10 @@ resource "aws_instance" "example" {
 }
 ```
 
+## State file của workspace
+
+Được lưu trong `terraform.tfstate.d/[workspace_name]`
+
 ## Implicit Dependencies
 
 Đây là cách terraform tạo ra dependency graph từ config file dựa theo thứ tự tạo cũng như tham chiếu giữa các resources.
@@ -97,6 +101,7 @@ resource "aws_instance" "example" {
 ```
 
 Như ở ví dụ trên, muốn tạo `aws_instance` cần phải có `aws_security_group` nên `security_group` sẽ được tạo trước.
+`security_group` sẽ được gọi là `implicit dependency`
 
 ### Lợi ích
 
@@ -179,4 +184,63 @@ resource "aws_instance" "web_us_east_1" {
     Name = "web-us-east-1"
   }
 }
+```
+
+## terraform plan -refresh-only
+
+Chỉ cập nhật state file mà không làm thay đổi gì đến infra của provider. Thường dùng trong trường hợp khi resource online bị chỉnh sửa bằng tay, ta sẽ chạy lệnh này để cập nhật lại state file.
+
+## Chỉ destroy một phần resource
+
+Bước 1: Chạy `terraform state rm` để loại bỏ đi resource mà ta **KHÔNG MUỐN DESTROY** khỏi state.
+
+Bước 2: Chạy `terraform destroy`
+
+## terraform provision
+
+Mặc định `terraform apply` có thể provision lên đến **10 resources** (quá trình provision được thực thi một cách song song) - đồng nghĩa với việc terraform có thể **cùng một lúc** thêm mới, cập nhật, xoá 10 resources.
+
+Con số này được thiết lập dựa theo `-parallelism` flag.
+
+Thường điều chỉnh con số `parallelism` theo các trường hợp như sau:
+
+- Deploy hệ thống lớn
+- CI/CD pipeline (do yêu cầu thời gian nghiêm ngặt)
+- API Rate limit (do API limit từ phía provider)
+
+## Yêu cầu để publish terraform public registry
+
+1. Cần có github public repo tương ứng
+2. Repo name phải theo format `terraform-<PROVIDER>-<NAME>` - với provider = aws hoặc google, ... name = tên mô tả repo (VD: terraform-aws-ec2-instance)
+3. Module structure
+
+```css
+├── main.tf
+├── variables.tf
+├── outputs.tf
+└── README.md
+```
+
+4. Document phải gồm các phần:
+
+- Description
+- Usage
+- Inputs
+- Outputs
+
+5. Semantic versioning
+
+Tag version trên github repo phải theo semantic version (`v1.0.0`, `v1.0.1`)
+
+```sh
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+## terraform import
+
+Để import các resources có sẵn vào terraform state. Cho phép ta có thể đưa các resources không nhất thiết được tạo bằng terraform vào sự quản lí của terraform mà không cần phải tạo lại resources.
+
+```sh
+terraform import ADDRESS ID
 ```
