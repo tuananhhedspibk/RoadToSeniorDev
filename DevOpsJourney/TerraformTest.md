@@ -1,10 +1,12 @@
 # Ghi chép chuẩn bị cho Terrafor Associate Test
 
-## terraform state
+## Câu lệnh liên quan đến terraform
 
-Chỉnh sửa state, ví dụ như loại bỏ items, ...
+### terraform console
 
-## terraform force-unlock
+Launch interactive console của terraform.
+
+### terraform force-unlock
 
 Bẻ khoá (lock) state hiện thời
 
@@ -12,33 +14,74 @@ Bẻ khoá (lock) state hiện thời
 terrform force-unlock LOCK_ID
 ```
 
-## Enabled logging
+### terraform state
 
-Set `TF_LOG` env variable để cho phép `detailed log`
+Chỉnh sửa state, ví dụ như loại bỏ items, ...
 
-## terraform console
-
-Launch interactive console của terraform.
-
-## terraform validate
+### terraform validate
 
 Câu lệnh này dùng để kiểm tra và báo cáo lỗi trong module, attribute names, value types để đảm bảo chúng đúng với cú pháp cũng như đảm bảo sự thống nhất bên trong.
 
-## terraform workspace select [name]
+### terraform apply -replace=[Name]
+
+Tạo lại resource
+
+```tf
+provider "aws" {
+  region = "us-west-2"
+}
+
+resource "aws_instance" "example" {
+  ami           = "ami-12345678"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "example-instance"
+  }
+}
+```
+
+```sh
+terraform apply -replace=aws_instance.example
+```
+
+### terraform plan -refresh-only
+
+Chỉ cập nhật state file mà không làm thay đổi gì đến infra của provider. Thường dùng trong trường hợp khi resource online bị chỉnh sửa bằng tay, ta sẽ chạy lệnh này để cập nhật lại state file.
+
+### terraform import
+
+Để import các resources có sẵn vào terraform state. Cho phép ta có thể đưa các resources không nhất thiết được tạo bằng terraform vào sự quản lí của terraform mà không cần phải tạo lại resources.
+
+```sh
+terraform import ADDRESS ID
+```
+
+### terraform get
+
+## Terraform Log
+
+### Enabled logging
+
+Set `TF_LOG` env variable để cho phép `detailed log`
+
+## Terraform Workspace
+
+### terraform workspace select [name]
 
 Chuyển giữa các workspaces. Về cơ bản workspace cho phép chúng ta `dùng một config cho nhiều môi trường (dev, stg, prod)` nhưng state của các môi trường này là riêng biệt.
 
 Sau khi khởi tạo, chúng ta sẽ có `default workspace`
 
-## terraform workspace new [name]
+### terraform workspace new [name]
 
 Tạo mới một workspace.
 
-## terraform workspace list
+### terraform workspace list
 
 Danh sách các workspace
 
-## terraform workspace delete [name]
+### terraform workspace delete [name]
 
 Xoá workspace nhưng chú ý rằng ta không thể xoá `default workspace`.
 
@@ -58,7 +101,7 @@ resource "aws_instance" "example" {
 }
 ```
 
-## State file của workspace
+### State file của workspace
 
 Được lưu trong `terraform.tfstate.d/[workspace_name]`
 
@@ -127,29 +170,6 @@ resource "aws_instance" "example" {
 
 Với việc sử dụng từ khoá `depends_on` ta có thể thấy một cách "tường minh" rằng `aws_instance` sẽ phụ thuộc vào `aws_security_group`
 
-## terraform apply -replace=[Name]
-
-Tạo lại resource
-
-```tf
-provider "aws" {
-  region = "us-west-2"
-}
-
-resource "aws_instance" "example" {
-  ami           = "ami-12345678"
-  instance_type = "t2.micro"
-
-  tags = {
-    Name = "example-instance"
-  }
-}
-```
-
-```sh
-terraform apply -replace=aws_instance.example
-```
-
 ## alias
 
 Sử dụng `alias` để có thể sử dụng **multiple provider blocks với cùng kiểu**
@@ -185,10 +205,6 @@ resource "aws_instance" "web_us_east_1" {
   }
 }
 ```
-
-## terraform plan -refresh-only
-
-Chỉ cập nhật state file mà không làm thay đổi gì đến infra của provider. Thường dùng trong trường hợp khi resource online bị chỉnh sửa bằng tay, ta sẽ chạy lệnh này để cập nhật lại state file.
 
 ## Chỉ destroy một phần resource
 
@@ -235,12 +251,4 @@ Tag version trên github repo phải theo semantic version (`v1.0.0`, `v1.0.1`)
 ```sh
 git tag v1.0.0
 git push origin v1.0.0
-```
-
-## terraform import
-
-Để import các resources có sẵn vào terraform state. Cho phép ta có thể đưa các resources không nhất thiết được tạo bằng terraform vào sự quản lí của terraform mà không cần phải tạo lại resources.
-
-```sh
-terraform import ADDRESS ID
 ```
