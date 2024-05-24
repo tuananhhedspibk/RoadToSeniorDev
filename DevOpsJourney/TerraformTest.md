@@ -59,6 +59,12 @@ terraform import ADDRESS ID
 
 ### terraform get
 
+Dùng để download module từ registry hoặc version control system.
+
+Lệnh này có thể được dùng để cập nhật version của một module cụ thể tới một version nhất định nào đó.
+
+Nếu cần cập nhật module cụ thể thì nên dùng lệnh này thay vì `terraform init`
+
 ## Terraform Log
 
 ### Enabled logging
@@ -105,7 +111,9 @@ resource "aws_instance" "example" {
 
 Được lưu trong `terraform.tfstate.d/[workspace_name]`
 
-## Implicit Dependencies
+## Dependencies
+
+### Implicit Dependencies
 
 Đây là cách terraform tạo ra dependency graph từ config file dựa theo thứ tự tạo cũng như tham chiếu giữa các resources.
 
@@ -146,12 +154,12 @@ resource "aws_instance" "example" {
 Như ở ví dụ trên, muốn tạo `aws_instance` cần phải có `aws_security_group` nên `security_group` sẽ được tạo trước.
 `security_group` sẽ được gọi là `implicit dependency`
 
-### Lợi ích
+#### Lợi ích
 
 1. Đơn giản hoá config khi không cần dùng từ khoá `depends_on`
 2. Đảm bảo resource được tạo đúng thứ tự
 
-## Explicit Dependencies
+### Explicit Dependencies
 
 ```tf
 resource "aws_instance" "example" {
@@ -169,6 +177,10 @@ resource "aws_instance" "example" {
 ```
 
 Với việc sử dụng từ khoá `depends_on` ta có thể thấy một cách "tường minh" rằng `aws_instance` sẽ phụ thuộc vào `aws_security_group`
+
+### Resource dependencies
+
+Terraform sẽ phân tích config trong terraform để tìm ra tham chiếu tới các resources khác. Từ đó đưa ra thứ tự `CRUD` các resources một các chính xác nhất.
 
 ## alias
 
@@ -252,3 +264,44 @@ Tag version trên github repo phải theo semantic version (`v1.0.0`, `v1.0.1`)
 git tag v1.0.0
 git push origin v1.0.0
 ```
+
+## Module
+
+```tf
+module "vault-aws-tgw" {
+  source  = "terraform-vault-aws-tgw/hcp" // source chỉ ra public registry mà module tham chiếu tới
+  version = "1.0.0"
+
+  client_id      = "4djlsn29sdnjk2btk"
+  hvn_id         = "a4c9357ead4de"
+  route_table_id = "rtb-a221958bc5892eade331"
+}
+```
+
+## Backend
+
+Backend trong terraform chỉ ra rằng state được loaded như thế nào và cách các thao tác như `apply` hoạt động.
+
+Các loại backend types:
+
+- `local`: lưu state file trong local file.
+- `consul`: là một sự lựa chọn phổ biến để lưu Terraform state.
+- `s3`: lưu terraform state trên Amazon S3.
+
+## TF_VAR
+
+Đây là prefix string dùng cho thiết lập input variables sử dụng biến môi trường trong terraform.
+
+```sh
+# export biến môi trường.
+export TF_VAR_instructor_name="bryan"
+
+# Apply, sử dụng biến môi trường.
+terraform apply
+```
+
+## Kiểu ngôn ngữ của terraform
+
+1. Immutable
+2. Declarative IaC provisiong language
+3. Dựa trên HCL hoặc JSON cho config files.
