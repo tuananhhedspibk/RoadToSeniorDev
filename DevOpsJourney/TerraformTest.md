@@ -18,6 +18,18 @@ State sẽ cache lại các attribute values nên giúp cải thiện về mặt
 
 nên việc cache các thông tin về resource trong state sẽ giúp cải thiện đáng kể về mặt hiệu năng. Ngoài ra ta có thể sử dụng `terraform plan -refresh=false` để tận dụng cache state.
 
+### Migration
+
+Ta có thể chuyển (migrate) state từ backend này sang backend khác.
+
+```sh
+terraform init -migrate-state
+```
+
+Lệnh này sẽ giúp tái sử dụng lại các providers được đọc từ lock file.
+
+[Screenshot 2024-05-25 at 22 14 17](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/b6254670-7004-4597-a981-877f3ee1d10e)
+
 ## Câu lệnh liên quan đến terraform
 
 ### terraform console
@@ -32,7 +44,13 @@ Bẻ khoá (lock) state hiện thời
 terrform force-unlock LOCK_ID
 ```
 
-Terraform "lock" state để tránh các concurrent modifies có thể gây ra lỗi
+Terraform "lock" state để tránh các concurrent modifies có thể gây ra lỗi.
+
+Chỉ có một vài backend hỗ trợ locking:
+
+- GCP
+- Azure
+- AWS S3 with DynamoDB
 
 ### terraform state
 
