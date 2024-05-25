@@ -32,6 +32,8 @@ Bẻ khoá (lock) state hiện thời
 terrform force-unlock LOCK_ID
 ```
 
+Terraform "lock" state để tránh các concurrent modifies có thể gây ra lỗi
+
 ### terraform state
 
 Chỉnh sửa state, ví dụ như loại bỏ items, ...
@@ -316,7 +318,7 @@ Backend trong terraform chỉ ra rằng state được loaded như thế nào v�
 
 Các loại backend types:
 
-- `local`: lưu state file trong local file.
+- `local`: lưu state file trong local file. Đây là default backend.
 - `consul`: là một sự lựa chọn phổ biến để lưu Terraform state.
 - `s3`: lưu terraform state trên Amazon S3.
 
