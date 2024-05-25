@@ -1,5 +1,23 @@
 # Ghi chép chuẩn bị cho Terrafor Associate Test
 
+## State trong terraform
+
+Thường sẽ lưu thông tin liên quan đến resources:
+
+- Resource ID
+- Resource attributes
+- ...
+
+lưu dưới dạng plain-text JSON. Các thông tin "nhạy cảm" như `database password` hay `database username` nên được lưu tại các `remote backend`.
+
+State sẽ cache lại các attribute values nên giúp cải thiện về mặt hiệu năng. Khi chạy `terraform plan` cho các infrastructure với quy mô lớn, việc query các resource sẽ gặp các vấn đề như sau:
+
+- Chậm
+- Nhiều cloud provider không cung cấp API để query nhiều resources một lúc.
+- Cloud Provider API Rate limitter.
+
+nên việc cache các thông tin về resource trong state sẽ giúp cải thiện đáng kể về mặt hiệu năng. Ngoài ra ta có thể sử dụng `terraform plan -refresh=false` để tận dụng cache state.
+
 ## Câu lệnh liên quan đến terraform
 
 ### terraform console
@@ -18,13 +36,23 @@ terrform force-unlock LOCK_ID
 
 Chỉnh sửa state, ví dụ như loại bỏ items, ...
 
+### terraform show
+
+Inspect state
+
+### terraform init
+
+`terraform init -backend-config=PATH`: chỉ định file config (các files này sẽ chứa thông tin nhạy cảm nên được giữ trong các secure data store).
+
+`terraform init -backend-config="KEY=VALUE"`: command line key/value pairs.
+
 ### terraform validate
 
 Câu lệnh này dùng để kiểm tra và báo cáo lỗi trong module, attribute names, value types để đảm bảo chúng đúng với cú pháp cũng như đảm bảo sự thống nhất bên trong.
 
 ### terraform apply -replace=[Name]
 
-Tạo lại resource
+Tạo lại resource (forcing). Thường chỉ nên sử dụng lệnh này khi resource gặp vấn đề **không liên quan đến terraform**
 
 ```tf
 provider "aws" {
@@ -64,6 +92,10 @@ Dùng để download module từ registry hoặc version control system.
 Lệnh này có thể được dùng để cập nhật version của một module cụ thể tới một version nhất định nào đó.
 
 Nếu cần cập nhật module cụ thể thì nên dùng lệnh này thay vì `terraform init`
+
+### terraform fmt
+
+Format terraform config file. Đảm bảo codebases có tính thống nhất cao.
 
 ## Terraform Log
 
@@ -305,3 +337,98 @@ terraform apply
 1. Immutable
 2. Declarative IaC provisiong language
 3. Dựa trên HCL hoặc JSON cho config files.
+
+## Terraform vault
+
+Là công cụ quản lí và bảo vệ các sensitive data. SỬ dụng `Vault` provider từ terraform.
+
+```tf
+// Khai báo provider
+provider "vault" {
+  address = "https://vault.example.com:8200"
+
+  token = "s.your-vault-token"
+}
+
+// Ghi secret vào vault
+resource "vault_generic_secret" "example" {
+  path = "secret/data/myapp/config"
+
+  data_json = jsondecode({
+    username = "admin"
+    password = "s3cr3t"
+  })
+}
+
+data "vault_generic_secret" "example" {
+  path = "secret/data/myapp/config"
+}
+
+output "username" {
+  value = data.vault_generic_secret.example.data["secret/data/myapp/config"]
+}
+```
+
+Một lưu ý là với các thông tin nhạy cảm như:
+
+- Vault tokens
+- Vault role IDs
+- Vault secret IDs
+
+ta cần lưu chúng vào các biến môi trường.
+
+```sh
+export VAULT_ADDR='https://vault.example.com:8200'
+export VAULT_TOKEN='s.your-vault-token'
+```
+
+Việc sử dụng vault có nhược điểm đó là các `secrets` sẽ được lưu trong `state file`. Do đó các `state file` này sẽ được coi như chứa các thông tin "nhạy cảm" và cần được bảo vệ.
+
+## Verbose logging terraform
+
+Để enable verbose logging trong terraform, ta cần thiết lập giá trị cho biến môi trường `TF_LOG` với các level logs như sau:
+
+- `TRACE`: show các internal logs của terraform. Cho ta thấy được nhiều thông tin chi tiết hơn (các bước đi từ `terraform plan`, `terraform apply` hay `terraform destroy`)
+- `DEBUG`
+- `INFO`
+- `WARN`
+- `ERROR`
+
+## Terraform block
+
+Định nghĩa settings và behaviors cụ thể.
+
+```tf
+terraform {
+  required_version = ">= 0.12.0"
+
+  backend "s3" {
+    bucket = "my-terraform-state"
+    key    = "terraform.tfstate"
+    region = "us-west-2"
+  }
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "3.57.0"
+    }
+  }
+}
+```
+
+`required_providers` được dùng để chỉ ra version cụ thể của provider mà ta muốn sử dụng.
+
+## Các vấn đề của việc quản lí Infra bằng tay
+
+1. Khó đảm bảo các components được config một cách thống nhất.
+2. Khó đảm bảo sự thống nhất, tiêu chuẩn giữa các môi trường khác nhau.
+3. Provisioning chậm.
+4. Khó tránh được các lỗi liên quan đến con người như `missed config`, ...
+5. Khó trong việc tạo document.
+
+## Terraform Cloud
+
+### Workspace
+
+Workspace trong terrraform cloud sẽ là các working directories riêng biệt chứ không giống như workspace của `terraform workspace`
