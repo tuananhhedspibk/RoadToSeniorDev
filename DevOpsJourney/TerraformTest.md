@@ -93,9 +93,13 @@ resource "aws_instance" "example" {
 terraform apply -replace=aws_instance.example
 ```
 
-### terraform plan -refresh-only
+### terraform refresh
 
-Chỉ cập nhật state file mà không làm thay đổi gì đến infra của provider. Thường dùng trong trường hợp khi resource online bị chỉnh sửa bằng tay, ta sẽ chạy lệnh này để cập nhật lại state file.
+Đọc toàn bộ các settings từ các remote objects và cập nhật lại state để match với remote objects.
+
+Đây chính là bước đầu tiên được chạy khi thực thi lệnh `terraform plan`
+
+`terraform plan -refresh-only`: Chỉ cập nhật state file mà không làm thay đổi gì đến infra của provider. Thường dùng trong trường hợp khi resource online bị chỉnh sửa bằng tay, ta sẽ chạy lệnh này để cập nhật lại state file. Do `terraform refesh` bị deprecated nên hãy sử dụng `terraform plan -refresh-only` với cùng tác dụng như nhau.
 
 ### terraform import
 
