@@ -18,6 +18,8 @@ State sẽ cache lại các attribute values nên giúp cải thiện về mặt
 
 nên việc cache các thông tin về resource trong state sẽ giúp cải thiện đáng kể về mặt hiệu năng. Ngoài ra ta có thể sử dụng `terraform plan -refresh=false` để tận dụng cache state.
 
+###
+
 ### Migration
 
 Ta có thể chuyển (migrate) state từ backend này sang backend khác.
@@ -336,13 +338,20 @@ module "vault-aws-tgw" {
 
 ## Backend
 
-Backend trong terraform chỉ ra rằng state được loaded như thế nào và cách các thao tác như `apply` hoạt động.
+Backend trong terraform là config chỉ ra rằng state được loaded, lưu trữ như thế nào.
 
 Các loại backend types:
 
 - `local`: lưu state file trong local file. Đây là default backend.
 - `consul`: là một sự lựa chọn phổ biến để lưu Terraform state.
 - `s3`: lưu terraform state trên Amazon S3.
+
+### Tại sao lại sử dụng backend
+
+1. `Collab`: tránh việc phát sinh conflict khi nhiều members cùng làm việc trên cùng một môi trường infra.
+2. `State locking`: tránh việc đồng thời sửa state cùng một lúc.
+3. `Remote storage`: đảm bảo state file được lưu ở nơi tập trung và có tính bảo mật cao.
+4. `Backup, Recovery`: tự động backup và recovery.
 
 ## TF_VAR
 
@@ -362,7 +371,19 @@ terraform apply
 2. Declarative IaC provisiong language
 3. Dựa trên HCL hoặc JSON cho config files.
 
-## Terraform vault
+## Sensitive data
+
+Các thông tin nhạy cảm như `key` hoặc `database password`, ...
+
+Ta có thể sử dụng backend như `S3` để mã hoá state cũng như các thông tin nhạy cảm.
+
+State best pratice:
+
+1. Coi state như `sensitive data`.
+2. Mã hoá state backend.
+3. Control access tới state file.
+
+### Terraform vault
 
 Là công cụ quản lí và bảo vệ các sensitive data. SỬ dụng `Vault` provider từ terraform.
 
