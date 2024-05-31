@@ -72,7 +72,15 @@ Inspect state
 
 Câu lệnh này dùng để kiểm tra và báo cáo lỗi trong module, attribute names, value types để đảm bảo chúng đúng với cú pháp cũng như đảm bảo sự thống nhất bên trong.
 
-### terraform apply -replace=[Name]
+### terraform apply
+
+Chú ý rằng khi chạy lệnh apply, ngay cả khi có những resources bị rollback thì những resources nào được tạo thành công vẫn sẽ được deployed mà không hề bị rollback.
+
+#### Với config file (tf) rỗng
+
+Toàn bộ resources sẽ bị huỷ.
+
+#### -replace=[Name]
 
 Tạo lại resource (forcing). Thường chỉ nên sử dụng lệnh này khi resource gặp vấn đề **không liên quan đến terraform**
 
@@ -383,6 +391,10 @@ State best pratice:
 2. Mã hoá state backend.
 3. Control access tới state file.
 
+### State được lưu dưới dạng plain text
+
+Ngay cả với các thông tin được đánh dấu là `sensitive`. Terraform run có thể in các giá trị "nhạy cảm" này ra log.
+
 ### Terraform vault
 
 Là công cụ quản lí và bảo vệ các sensitive data. SỬ dụng `Vault` provider từ terraform.
@@ -523,3 +535,21 @@ Dùng khi làm việc nhóm. Liên kết terraform workspace với VCS repo và 
 Ngoài ra nhiều workspace (dev, stg, prod) có thể liên kết và sử dụng chung một code base từ VCS repo.
 
 Với các workspace liên kết với VCS, yêu cầu VCS-driven workflow để đảm bảo `single source of truth` chứ không được phép chạy `terraform apply` bằng CLI hoặc phương thức khác (vẫn có thể chạy `terraform plan`).
+
+### Agents
+
+Thực thi terraform plan và apply changes tới infrastructre
+
+Chức năng cơ bản:
+
+- Nhận `terraform plan` từ Terraform cloud.
+- Chạy plan dưới local.
+- Apply những sự thay đổi đó.
+
+## Infrastructure as code
+
+Có khả năng:
+
+- Versionning cho infra.
+- Chia sẻ, tái sử dụng code.
+- Tạo blueprint cho data center.
