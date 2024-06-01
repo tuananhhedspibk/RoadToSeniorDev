@@ -36,6 +36,8 @@ Lệnh này sẽ giúp tái sử dụng lại các providers được đọc t�
 
 Launch interactive console của terraform.
 
+Lệnh này đọc terraform configure ở working dir hiện tại và terraform state file nên CLI phải có khả năng lock state để tránh sự thay đổi state.
+
 ### terraform force-unlock
 
 Bẻ khoá (lock) state hiện thời
@@ -146,6 +148,8 @@ Format terraform config file. Đảm bảo codebases có tính thống nhất ca
 ### Enabled logging
 
 Set `TF_LOG` env variable để cho phép `detailed log`
+
+Set `TF_LOG_PATH` để thiết lập đường dẫn cho file lưu log.
 
 ## Terraform Workspace
 
@@ -311,6 +315,47 @@ Thường điều chỉnh con số `parallelism` theo các trường hợp như 
 - Deploy hệ thống lớn
 - CI/CD pipeline (do yêu cầu thời gian nghiêm ngặt)
 - API Rate limit (do API limit từ phía provider)
+
+### remote-exec & local-exec
+
+Là các provisioner được sử dụng để chạy các scripts hoặc command trên môi trường lần lượt là `remote` và `local`.
+
+Thường dùng trong quá trình boostrapping, config resource.
+
+Ví dụ với `remote-exec`
+
+```tf
+resource "aws_instace" "example" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+
+  provisioner "remote-exec" {
+    connection {
+      type = "ssh"
+      user = "ec2-user"
+      private_key = file("~/.ssh/my-key.pem")
+    }
+
+    inline = [
+      "sudo apt-get update",
+      "sudo apt-get install -y nginx",
+      "sudo service nginx start"
+    ]
+  }
+}
+```
+
+Ví dụ với `local-exec`
+
+```tf
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+
+  provisioner "local-exec" {
+    command = "echo 'S3 bucket created!' > /tmp/s3_notification.txt"
+  }
+}
+```
 
 ## Yêu cầu để publish terraform public registry
 
