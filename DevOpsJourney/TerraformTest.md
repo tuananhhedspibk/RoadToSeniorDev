@@ -18,8 +18,6 @@ State sẽ cache lại các attribute values nên giúp cải thiện về mặt
 
 nên việc cache các thông tin về resource trong state sẽ giúp cải thiện đáng kể về mặt hiệu năng. Ngoài ra ta có thể sử dụng `terraform plan -refresh=false` để tận dụng cache state.
 
-###
-
 ### Migration
 
 Ta có thể chuyển (migrate) state từ backend này sang backend khác.
@@ -67,6 +65,8 @@ Inspect state
 `terraform init -backend-config=PATH`: chỉ định file config (các files này sẽ chứa thông tin nhạy cảm nên được giữ trong các secure data store).
 
 `terraform init -backend-config="KEY=VALUE"`: command line key/value pairs.
+
+`terraform init` cũng caches source code local cho các modules tương ứng.
 
 ### terraform validate
 
@@ -130,6 +130,16 @@ Nếu cần cập nhật module cụ thể thì nên dùng lệnh này thay vì 
 ### terraform fmt
 
 Format terraform config file. Đảm bảo codebases có tính thống nhất cao.
+
+`-recursive`: chạy với cả subdirectories.
+
+### terraform plan
+
+`-out` cho phép chúng ta save plan để apply lúc sau.
+
+### terraform graph
+
+Đưa ra đồ thị dependency trong config hiện thời dưới dạng ngôn ngữ `DOT`. Ngoài ra nó cũng có thể visual config hoặc execute plan.
 
 ## Terraform Log
 
@@ -441,6 +451,10 @@ export VAULT_TOKEN='s.your-vault-token'
 
 Việc sử dụng vault có nhược điểm đó là các `secrets` sẽ được lưu trong `state file`. Do đó các `state file` này sẽ được coi như chứa các thông tin "nhạy cảm" và cần được bảo vệ.
 
+## Credential Information
+
+Ta có thể sử dụng `AWS IAM` hoặc `Azure Managed Service Identity` để cung cấp credential cho terraform. Với các services này ta có thể kết nối tới API mà không cần expose các thông tin nhạy cảm trong terraform config.
+
 ## Verbose logging terraform
 
 Để enable verbose logging trong terraform, ta cần thiết lập giá trị cho biến môi trường `TF_LOG` với các level logs như sau:
@@ -483,6 +497,18 @@ terraform {
 3. Provisioning chậm.
 4. Khó tránh được các lỗi liên quan đến con người như `missed config`, ...
 5. Khó trong việc tạo document.
+
+## Terraform provider
+
+Offical terraform providers và modules đều được sở hữu và maintaince bởi Hashicorp.
+
+Provider có thể được terraform tự động detect và download khi chạy lệnh `terraform init`.
+
+Provider có thể được cài qua:
+
+- Terraform registry.
+- Terraform plugin cache.
+- Plugins directory.
 
 ## Terraform Cloud
 
@@ -528,6 +554,8 @@ Policy có 3 levels chính đó là:
 - `Soft Mandatory`: cho phép override còn không thì phải pass.
 - `Hard Mandatory`: bắt buộc phải pass, không cho phép override.
 
+Sentinal policy evaluation sẽ được thực thi `sau khi terrảom hoàn thành plan, cost estimation và trước khi apply`.
+
 ### Version control workflow
 
 Dùng khi làm việc nhóm. Liên kết terraform workspace với VCS repo và trigger apply hoặc plan mỗi khi commit code.
@@ -553,3 +581,5 @@ Có khả năng:
 - Versionning cho infra.
 - Chia sẻ, tái sử dụng code.
 - Tạo blueprint cho data center.
+
+Cho phép `API-driven workflow` cho việc deploy resource trong public cloud, private infra, ...
