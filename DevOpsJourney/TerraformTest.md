@@ -78,6 +78,8 @@ Câu lệnh này dùng để kiểm tra và báo cáo lỗi trong module, attrib
 
 Chú ý rằng khi chạy lệnh apply, ngay cả khi có những resources bị rollback thì những resources nào được tạo thành công vẫn sẽ được deployed mà không hề bị rollback.
 
+`terraform apply -refresh=false` - sẽ bỏ qua quá trình refresh state trước khi apply.
+
 #### Với config file (tf) rỗng
 
 Toàn bộ resources sẽ bị huỷ.
@@ -120,6 +122,10 @@ terraform apply -replace=aws_instance.example
 ```sh
 terraform import ADDRESS ID
 ```
+
+### terraform output
+
+Đọc giá trị của biến output từ terraform state.
 
 ### terraform get
 
@@ -298,11 +304,17 @@ resource "aws_instance" "web_us_east_1" {
 }
 ```
 
-## Chỉ destroy một phần resource
+## terraform destroy
+
+### Chỉ destroy một phần resource
 
 Bước 1: Chạy `terraform state rm` để loại bỏ đi resource mà ta **KHÔNG MUỐN DESTROY** khỏi state.
 
 Bước 2: Chạy `terraform destroy`
+
+### Force destroy
+
+`terraform destroy -auto-approve` - huỷ toàn bộ resources mà không cần confirm.
 
 ## terraform provision
 
