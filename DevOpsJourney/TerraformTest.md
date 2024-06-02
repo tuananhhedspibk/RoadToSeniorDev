@@ -1,5 +1,21 @@
 # Ghi chép chuẩn bị cho Terrafor Associate Test
 
+## Data types
+
+Simple variable types:
+
+- String
+- Number
+- Bool
+
+Complex variable types:
+
+- List(type)
+- Set(type) → List with unique & sorted elements (`[2, 1, 3, 3] -> [1, 2, 3]`)
+- Map(type) → Same types elements (`{string: "string", str: "string"}`)
+- Object → Map with different types elements (`{string: "string", bool: true}`)
+- Tuple → like a List with different types elements (`{0, "string", true}`)
+
 ## State trong terraform
 
 Thường sẽ lưu thông tin liên quan đến resources:
@@ -148,6 +164,19 @@ Format terraform config file. Đảm bảo codebases có tính thống nhất ca
 ### terraform graph
 
 Đưa ra đồ thị dependency trong config hiện thời dưới dạng ngôn ngữ `DOT`. Ngoài ra nó cũng có thể visual config hoặc execute plan.
+
+## Biến môi trường
+
+Sẽ định nghĩa trong một file tên là `terraform.tfvars`.
+
+VD:
+
+```tf
+AWS_REGION = ""
+AWS_ACCESS_KEY = ""
+```
+
+File `terraform.tfvars` phải được đưa vào `gitignore`.
 
 ## Terraform Log
 
@@ -569,7 +598,7 @@ Provider có thể được cài qua:
 
 ## Terraform Cloud
 
-## Mối liên hệ với Terraform CLI
+### Mối liên hệ với Terraform CLI
 
 ![Screenshot 2024-05-30 at 21 42 59](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/e785b0b6-9890-458a-b5f5-34c0b1644308)
 
