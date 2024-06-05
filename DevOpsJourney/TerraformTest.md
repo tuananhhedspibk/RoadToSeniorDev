@@ -1,4 +1,4 @@
-# Ghi chép chuẩn bị cho Terrafor Associate Test
+# Ghi chép chuẩn bị cho Terraform Associate Test
 
 ## Data types
 
@@ -44,7 +44,7 @@ terraform init -migrate-state
 
 Lệnh này sẽ giúp tái sử dụng lại các providers được đọc từ lock file.
 
-[Screenshot 2024-05-25 at 22 14 17](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/b6254670-7004-4597-a981-877f3ee1d10e)
+![Screenshot 2024-05-25 at 22 14 17](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/b6254670-7004-4597-a981-877f3ee1d10e)
 
 ## Câu lệnh liên quan đến terraform
 
@@ -472,7 +472,7 @@ terraform apply
 ## Kiểu ngôn ngữ của terraform
 
 1. Immutable
-2. Declarative IaC provisiong language
+2. Declarative IaC provision language
 3. Dựa trên HCL hoặc JSON cho config files.
 
 ## Sensitive data
@@ -493,7 +493,7 @@ Ngay cả với các thông tin được đánh dấu là `sensitive`. Terraform
 
 ### Terraform vault
 
-Là công cụ quản lí và bảo vệ các sensitive data. SỬ dụng `Vault` provider từ terraform.
+Là công cụ quản lí và bảo vệ các sensitive data. Sử dụng `Vault` provider từ terraform.
 
 ```tf
 // Khai báo provider
@@ -640,7 +640,7 @@ Policy có 3 levels chính đó là:
 - `Soft Mandatory`: cho phép override còn không thì phải pass.
 - `Hard Mandatory`: bắt buộc phải pass, không cho phép override.
 
-Sentinal policy evaluation sẽ được thực thi `sau khi terrảom hoàn thành plan, cost estimation và trước khi apply`.
+Sentinal policy evaluation sẽ được thực thi `sau khi terrafom hoàn thành plan, cost estimation và trước khi apply`.
 
 ### Version control workflow
 
