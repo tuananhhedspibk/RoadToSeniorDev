@@ -26,3 +26,9 @@ Khi bố trí các containers vào các cluster thì khi tăng thêm container m
 Ngoài ra khi host bị down, cần có cơ chế phục hồi lại container.
 
 ![Screenshot 2024-06-02 at 18 14 32](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/929cfe48-b59f-41a9-b987-0e1c4f279c99)
+
+### Phân tán tải lên các containers
+
+Việc phân tán tải sẽ giúp cải thiện hiệu năng và tính khả dụng của hệ thống.
+
+Với orchestrator và các load balancers, chúng ta hoàn toàn có thể thực hiện việc phân tải lên các containers.
