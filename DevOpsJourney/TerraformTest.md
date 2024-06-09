@@ -16,6 +16,28 @@ Complex variable types:
 - Object → Map with different types elements (`{string: "string", bool: true}`)
 - Tuple → like a List with different types elements (`{0, "string", true}`)
 
+## for_each
+
+Dùng để tạo nhiều resources cùng một lúc với nguồn là `list`, `set`, `map`. VD:
+
+```terraform
+// variables.tf
+variable public_subnets {
+  default = {
+    "public_subnet_1" = 1
+    "public_subnet_2" = 2
+    "public_subnet_3" = 3
+  }
+}
+
+
+// main.tf
+resource "aws_subnet" "public_subnets" {
+  for_each                = var.public_subnets
+  map_public_ip_on_launch = true
+}
+```
+
 ## State trong terraform
 
 Thường sẽ lưu thông tin liên quan đến resources:
