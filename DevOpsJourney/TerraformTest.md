@@ -20,7 +20,7 @@ Complex variable types:
 
 Dùng để tạo nhiều resources cùng một lúc với nguồn là `list`, `set`, `map`. VD:
 
-```terraform
+```tf
 // variables.tf
 variable public_subnets {
   default = {
@@ -35,6 +35,112 @@ variable public_subnets {
 resource "aws_subnet" "public_subnets" {
   for_each                = var.public_subnets
   map_public_ip_on_launch = true
+}
+```
+
+### for_each vs count
+
+Cả 2 đều được dùng để tạo nhiều instances cùng lúc nhưng:
+
+- `for_each` có thể làm việc với `sets` hoặc `maps`, ngoài ra còn cung cấp cách tham chiếu đến instances bằng key.
+- `count` chỉ có thể làm việc với `lists` hoặc các config đơn giản.
+
+```tf
+variable "security_groups" {
+  type = map(object({
+    name        = string
+    description = string
+  }))
+  default = {
+    sg1 = {
+      name        = "allow_ssh"
+      description = "Allow SSH traffic"
+    }
+    sg2 = {
+      name        = "allow_httop"
+      description = "Allow HTTP traffic"
+    }
+  }
+}
+
+resource "aws_security_group" "example" {
+  for_each    = var.security_groups
+
+  name        = each.value.name
+  description = each.value.description
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port  = 22
+    to_port    = 22
+    protocol   = "tcp"
+    cidr_block = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port  = 0
+    to_port    = 0
+    protocol   = "-1"
+    cidr_block = ["0.0.0.0/0"]
+  }
+}
+```
+
+## dynamic block
+
+Dùng để tạo các blocks (cũng có thể là nested block).
+
+Một dynamic block sẽ bao gồm các thông tin như sau:
+
+- `content`: nội dung sẽ được lặp lại
+- `for_each`: collection để lặp qua
+- `iterator`: (optional) dùng để chỉ ra tên của biết dùng trong `content` block.
+
+```tf
+variable "ingress_rules" {
+  type = list(object({
+    from_port   = number
+    to_port     = number
+    protocol    = string
+    cidr_blocks = list(string)
+  }))
+
+  default = [
+    {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    },
+    {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = [0.0.0.0/0"]
+    }
+  ]
+}
+
+resource "aws_security_group" "example" {
+  name = "example"
+  vpc_id = aws_vpc.main.id
+
+  dynamic "ingress" {
+    for_each = var.ingress_rules
+    content {
+      from_port   = ingress.value.from_port
+      to_port     = ingress.value.to_port
+      protocol    = ingress.value.protocol
+      cidr_blocks = ingress.value.cidr_blocks
+    }
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 ```
 
@@ -85,6 +191,8 @@ terrform force-unlock LOCK_ID
 ```
 
 Terraform "lock" state để tránh các concurrent modifies có thể gây ra lỗi.
+
+Khi chạy lệnh `terraform plan` hoặc `terraform apply` (với backend là `local`), sẽ sinh ra file `.terraform.tfstate.lock.info` để lock state lại.
 
 Chỉ có một vài backend hỗ trợ locking:
 
