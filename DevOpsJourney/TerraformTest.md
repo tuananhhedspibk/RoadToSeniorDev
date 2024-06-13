@@ -1,5 +1,11 @@
 # Ghi chép chuẩn bị cho Terraform Associate Test
 
+## Variable default value
+
+Thông thường các biến và giá trị mặc định của chúng sẽ được định nghĩa trong `main.tf` hoặc `variables.tf`.
+
+Thế nhưng việc định nghĩa giá trị cho biến ở trong file `.tfvars` sẽ là một cách giúp ghi đè lên các giá trị mặc định này của biến.
+
 ## Data types
 
 Simple variable types:
