@@ -805,3 +805,7 @@ Có khả năng:
 - Tạo blueprint cho data center.
 
 Cho phép `API-driven workflow` cho việc deploy resource trong public cloud, private infra, ...
+
+### Lợi điểm
+
+IaC makes changes idempotent, consistent, repeatable, and predictable. Without IaC, scaling up infrastructure to meet increased demand may require an operator to remotely connect to each machine and then manually provision and configure many servers by executing a series of commands/scripts. They might open multiple sessions and move between screens, which often results in skipped steps or slight variations between how work is completed, necessitating rollbacks. Perhaps a command was run incorrectly on one instance and reverted before being re-run correctly.
