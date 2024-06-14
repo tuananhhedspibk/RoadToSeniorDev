@@ -808,4 +808,33 @@ Cho phép `API-driven workflow` cho việc deploy resource trong public cloud, p
 
 ### Lợi điểm
 
-IaC makes changes idempotent, consistent, repeatable, and predictable. Without IaC, scaling up infrastructure to meet increased demand may require an operator to remotely connect to each machine and then manually provision and configure many servers by executing a series of commands/scripts. They might open multiple sessions and move between screens, which often results in skipped steps or slight variations between how work is completed, necessitating rollbacks. Perhaps a command was run incorrectly on one instance and reverted before being re-run correctly.
+IaC giúp các sự thay đổi trở nên:
+
+- Idempotent
+- Consistent
+- Repeatable
+- Predictable.
+
+Nếu không có IaC, việc scale up infrastructure sẽ đòi hỏi thêm nhiều yêu cầu như:
+
+- Remotely connect tới servers
+- Manually provision, configure server thông qua các scripts hoặc rất nhiều câu lệnh.
+- ...
+
+## Cloud-agnostic
+
+Là khả năng app có thể vận hành trên bất kì nền tảng cloud nào mà không phụ thuộc vào bất cứ một tính năng cụ thể của nền tảng đó (AWS, GCP, Azure).
+
+Điều này giúp hệ thống có thể chuyển đổi dễ dàng giữa các nền tảng Cloud mà không làm ảnh hưởng đến kiến trúc tổng quan của hệ thống.
+
+Các đặc điểm cơ bản của cloud-agnostic đó là:
+
+- Interoperability: khả năng hoạt động liền mạch trên các môi trường cloud khác nhau.
+- Portability: Ứng dụng dễ dàng migrate, deploy giữa các cloud platform khác nhau.
+- Independence: Không phụ thuộc vào bất kì một API hoặc services cụ thể nào.
+- Flexibility: Khả năng lựa chọn cloud provider phù hợp với mình cũng như thay đổi provider một cách dễ dàng.
+
+Để đạt được mục tiêu `cloud-agnostic` các tổ chức thường dùng:
+
+- Docker (container hoá)
+- Kubernetes (Orchestration tool)
