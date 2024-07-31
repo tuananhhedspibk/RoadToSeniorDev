@@ -55,6 +55,6 @@ Như đã nói ở trên, do vốn dĩ tôi đã nắm được những khái ni
 
 Bạn đọc có thể mua đề thi mẫu trên Udemy tại địa chỉ: <https://www.udemy.com/course/terraform-associate-practice-exam/>
 
-Ngoài ra bạn đọc cũng có thể tham khảo một vài ghi chép về các khái niệm cơ bản có tron Terraform của tôi tại github repository: <https://github.com/tuananhhedspibk/terraform-associate-003-vn>
+Ngoài ra bạn đọc cũng có thể tham khảo một vài ghi chép về các khái niệm cơ bản có trong Terraform của tôi tại github repository: <https://github.com/tuananhhedspibk/terraform-associate-003-vn>
 
 Chúc các bạn thành công, happy coding =))
