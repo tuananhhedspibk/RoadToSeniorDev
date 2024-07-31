@@ -41,12 +41,20 @@ Nếu không ngại bạn đọc có thể kết nối với tôi tại linkedin
 
 ## Đánh giá cá nhân
 
-Theo như đánh giá của cá nhân tôi thì
+Theo như đánh giá của cá nhân tôi thì phần nội dung của đề thi khá cơ bản khi chỉ xoay quanh các phần chính như sau:
 
-- Mức độ khó dễ
-- Các mục đánh giá
+1. Hiểu về IaC (Infrastructure as Code) là gì.
+2. Hiểu được các khái niệm cơ bản của Terraform.
+3. Có khả năng đọc hiểu, viết các terraform config cơ bản
+4. Triển khai được state.
+5. Hiểu về khả năng của Terraform cloud.
 
-## Suggest resource ôn
+## Tài liệu ôn tập
 
-- Udemy course
-- Github repo
+Như đã nói ở trên, do vốn dĩ tôi đã nắm được những khái niệm cơ bản về terraform nên chủ yếu tôi chỉ luyện một vài đề thi mẫu có trên Udemy để quen hơn về dạng bài cũng như nội dung thi.
+
+Bạn đọc có thể mua đề thi mẫu trên Udemy tại địa chỉ: <https://www.udemy.com/course/terraform-associate-practice-exam/>
+
+Ngoài ra bạn đọc cũng có thể tham khảo một vài ghi chép về các khái niệm cơ bản có tron Terraform của tôi tại github repository: <https://github.com/tuananhhedspibk/terraform-associate-003-vn>
+
+Chúc các bạn thành công, happy coding =))

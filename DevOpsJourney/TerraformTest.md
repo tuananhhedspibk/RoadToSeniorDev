@@ -586,7 +586,7 @@ Các loại backend types:
 - `consul`: là một sự lựa chọn phổ biến để lưu Terraform state.
 - `s3`: lưu terraform state trên Amazon S3.
 
-### Tại sao lại sử dụng backend
+### Tại sao lại sử dụng backend?
 
 1. `Collab`: tránh việc phát sinh conflict khi nhiều members cùng làm việc trên cùng một môi trường infra.
 2. `State locking`: tránh việc đồng thời sửa state cùng một lúc.
