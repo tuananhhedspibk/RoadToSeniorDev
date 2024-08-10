@@ -1,4 +1,4 @@
-# Build error-handling classes for DDD and Clean Architecture
+# Build error-handling classes for DDD and Clean Architecture with Typescript
 
 ## The need to have error-handling classes
 
@@ -15,6 +15,8 @@ In this article, I will show you how it designed and built error-handling classe
 
 ### Design and coding
 
+#### A litte bit about DDD
+
 Let's talk about DDD and Clean Architecture. Unlike traditional architecture like MVC or MVVM, DDD & Clean Architecture make the business logic the center of the entire application. We will separate our application into layers, each with its mission. Here, we will have four layers:
 
 1. Domain layer: this is the heart of the entire application; it includes the central business logic.
@@ -27,6 +29,8 @@ And pay attention that the inside layer can not be dependent on the outer layer 
 ![291058405-83885e17-766b-4a95-9c4e-b26d52182215](https://github.com/user-attachments/assets/63e4ce72-a399-434b-b7c8-c192533778b4)
 
 In the above picture, three red arrows illustrate the `Dependencies Rules`: The use-case layer must depend on the domain layer, and the Presentation layer must depend on the Use-case layer.
+
+#### Base classes
 
 OK, that is enough for DDD. Now, we will move on to our main topic **Error-Handling Classes**. I separate my application into four layers:
 
@@ -95,5 +99,109 @@ class DomainError extends BaseError {
 ```
 
 Because I want the info property to store various information types, I have defined it in a free style—just an object with a string key and a value that can be any data type.
+
+#### Error code
+
+Now is `Error Code`. I want to tell you the property `code` of the above error classes.
+
+Well, we can use the type `string`, but I want to have something fixed, something more structured, so I've decided to define `Error Enum`. With typescript, you can define `enum` like this:
+
+```ts
+enum ErrorCode {
+  InternalServerError,
+}
+```
+
+However, have some reasons for not choosing `Enum`. Instead of that, I am going to define a constant like this:
+
+```ts
+const ErrorCode = {
+  SOME_ERROR: 'SOME_ERROR',
+} as const;
+```
+
+The main reason is that I want to have an immutable literal error code. Another article will explain the difference between `as const` and `enum` in more detail.
+
+Back to error classes, I am going to define error code constants like this:
+
+```ts
+const DomainErrorCode = {
+  BAD_REQUEST: 'BAD_REQUEST',
+  NOT_FOUND: 'NOT_FOUND',
+  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
+} as const;
+
+type DomainErrorCode = (typeof DomainErrorCode)[keyof typeof DomainErrorCode];
+```
+
+By doing this I'll have a type `DomainErrorCode` like this:
+
+```ts
+// 'BAD_REQUEST' | 'NOT_FOUND' | 'INTERNAL_SERVER_ERROR'
+```
+
+I will do the same thing with the `UsecaseErrorCode`, `PresentationErrorCode`, and `InfrastructureErrorCode` data types which correspond to the `Usecase layer`, `Presentation layer`, and `Infrastructure layer`.
+
+Now I want to show you one more thing: `ErrorDetailCode`. You can ask: 'What is this?' simply it's just an
+
+> Error code that gives you more detail about where the error is occurring or what business logic or what API is getting an error
+
+The reason I want to define it is that `ErrorCode` is just a common code for `Bad Request Error—400`, `Not Found Error—404`, or `Internal Server Error—500`. With `ErrorCode` only, we can not know exactly where the error is occurring, what API is involved, or what business logic is facing the error.
+
+I'll do the same thing to define the `ErrorDetailCode` type as I did with `ErrorCode,` for example, for the domain layer.
+
+```ts
+const DomainErrorDetailCode = {
+  INVALID_PASSWORD: 'INVALID_PASSWORD',
+  INVALID_USERNAME: 'INVALID_USERNAME',
+};
+
+type DomainErrorDetailCode =
+  (typeof DomainErrorDetailCode)[keyof typeof DomainErrorDetailCode];
+```
+
+And of course, I'll have the same thing for `UsecaseErrorDetailCode`, `PresentationErrorDetailCode`, `InfrastructureErrorDetailCode`.
+
+Finally, we will have the entire ErrorCode class like this:
+
+```ts
+const DomainErrorDetailCode = {
+  INVALID_PASSWORD: 'INVALID_PASSWORD',
+  INVALID_USERNAME: 'INVALID_USERNAME',
+};
+
+type DomainErrorDetailCode =
+  (typeof DomainErrorDetailCode)[keyof typeof DomainErrorDetailCode];
+
+const DomainErrorCode = {
+  BAD_REQUEST: 'BAD_REQUEST',
+  NOT_FOUND: 'NOT_FOUND',
+  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
+} as const;
+
+type DomainErrorCode = (typeof DomainErrorCode)[keyof typeof DomainErrorCode];
+
+interface DomainErrorParams {
+  info?: { [key: string]: unknown };
+  code: DomainErrorCode; // This DomainErrorCode class is the thing that I wanted
+  message: string;
+}
+
+export class DomainError extends Error {
+  info?: { [key: string]: unknown };
+  code: DomainErrorCode;
+  message: string;
+
+  constructor(params: DomainErrorParams) {
+    super();
+
+    this.code = params.code;
+    this.message = params.message;
+    this.info = params.info || null;
+  }
+}
+```
+
+OK, that is something about designing and some snippet codes about the `ErrorCode` class. In the next section, I'll show you how to use it.
 
 ### Applying
