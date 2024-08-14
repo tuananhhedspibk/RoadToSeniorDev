@@ -205,3 +205,47 @@ export class DomainError extends Error {
 OK, that is something about designing and some snippet codes about the `ErrorCode` class. In the next section, I'll show you how to use it.
 
 ### Applying
+
+Let's take an example of a web application's signup feature. I've used the DDD for my web application so the signup logic will go to the use-case layer.
+
+You can see more details here.
+
+<https://github.com/tuananhhedspibk/NewAnigram-BE-DDD/blob/main/src/usecase/authentication/signup/index.ts#L78>
+
+I'll take a code snippet to explain.
+
+```ts
+async execute(command: SignupUsecaseInput) {
+  const { email, password } = input;
+
+  if (!email || !password) {
+    throw new UsecaseError({
+      message: 'Must specify email and password',
+      code: UsecaseErrorCode.BAD_REQUEST,
+      info: {
+        detailCode: UsecaseErrorDetailCode.MUST_SPECIFY_EMAIL_AND_PASSWORD,
+      },
+    });
+  }
+}
+```
+
+You can see that after receiving the email and password parameters, I will check their lengths; if one of those is equal to 0, I'm going to throw a `UsecaseError` to notice that the email or password has a problem, like this:
+
+In the above picture, all of this information:
+
+- Error Type
+- Error Message
+- Error Code
+- Error Detail Code
+
+is shown.
+
+Just throwing an error with an error message is enough. Exactly, I felt the same thing before, but it has some cons as the following:
+
+- The `Error Message` can be too long for the client's screen size, so the user can not read the entire message; instead of using `Error Message`, the client can use `Error Code` or `Error Detail Code` to map with the `Error Message` that fits the user's screen size.
+- `Error Code` and `Error Detail Code` make our error more specific, making our debugging process easier.
+
+That is, you can think that defining an error class system is too "engineering" and does not provide any pros to the business. OK, you are not wrong, but if you want your system to become maintainable and easy to recover, I highly recommend defining your system's own error classes.
+
+Thanks for reading; I'll see you in the next blog. Happy coding =)))
