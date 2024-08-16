@@ -15,7 +15,7 @@ In this article, I will show you how it designed and built error-handling classe
 
 ### Design and coding
 
-#### A litte bit about DDD
+#### A little bit about DDD
 
 Let's talk about DDD and Clean Architecture. Unlike traditional architecture like MVC or MVVM, DDD & Clean Architecture make the business logic the center of the entire application. We will separate our application into layers, each with its mission. Here, we will have four layers:
 
@@ -242,6 +242,8 @@ In the above picture, all of this information:
 is shown.
 
 Just throwing an error with an error message is enough. Exactly, I felt the same thing before, but it has some cons as the following:
+
+![Screenshot 2024-08-14 at 23 04 37](https://github.com/user-attachments/assets/62c4953f-7e52-483a-9c06-363b7f17261b)
 
 - The `Error Message` can be too long for the client's screen size, so the user can not read the entire message; instead of using `Error Message`, the client can use `Error Code` or `Error Detail Code` to map with the `Error Message` that fits the user's screen size.
 - `Error Code` and `Error Detail Code` make our error more specific, making our debugging process easier.
