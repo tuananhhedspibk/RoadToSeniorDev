@@ -32,14 +32,14 @@ Sau khi đã hiểu rõ được mục đích của mình khi đưa ra log, chú
 
 After understanding the purpose of loggin we should hierarchy the log
 
-| Log level | Concept                                                                                                                    | How to handle                               | Example                                     |
-| --------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------- |
-| FATAL     | This Level hinder the operating of the system                                                                              | Have to fix immediately                     | Can not connect to the DB                   |
-| ERROR     | Unexpected errors occur                                                                                                    | Should be fixed as soon as you can          | Can not send the email                      |
-| WARN      | Not an error, but are some problems like unexpected input or unexpected executing unexpected input or unexpected executing | Should be refactored regularly              | Regularly delete data API                   |
-| INFO      | Notification when starting or ending an executing or a transaction. Maybe outputting another needed information            | Do not need to fix                          | Output the body of the request or ressponse |
-| DEBUG     | The information that relating to system status                                                                             | Do not output in the production environment | Can be put inside a function                |
-| TRACE     | Information that is more detailed than DEBUG                                                                               | Do not output in the production environment |                                             |
+| Log level | Concept                                                                                                                    | How to handle                               | Example                                    |
+| --------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------ |
+| FATAL     | This Level hinder the operating of the system                                                                              | Have to fix immediately                     | Can not connect to the DB                  |
+| ERROR     | Unexpected errors occur                                                                                                    | Should be fixed as soon as you can          | Can not send the email                     |
+| WARN      | Not an error, but are some problems like unexpected input or unexpected executing unexpected input or unexpected executing | Should be refactored regularly              | Regularly delete data API                  |
+| INFO      | Notification when starting or ending an executing or a transaction. Maybe outputting another needed information            | Do not need to fix                          | Output the body of the request or response |
+| DEBUG     | The information that relating to system status                                                                             | Do not output in the production environment | Can be put inside a function               |
+| TRACE     | Information that is more detailed than DEBUG                                                                               | Do not output in the production environment |                                            |
 
 ## Case
 
