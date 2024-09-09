@@ -231,3 +231,111 @@ export class LoggerInterceptor implements NestInterceptor {
 ```
 
 you can read [here](https://github.com/tuananhhedspibk/restful-app/blob/main/libs/interceptor/logger/index.ts) for more details.
+
+I defined three methods:
+
+- requestLogger
+- responseLogger
+- responseErrorLogger
+
+like this:
+
+```ts
+export const requestLogger = (request: Request) => {
+  const { ip, originalUrl, method, params, query, body, headers } = request;
+
+  // logTemplate includes: now(time), ip, http_method, url, request_object
+  const logTemplate = '%s %s %s %s %s';
+  const now = dayjs().format('YYYY-MM-DD HH:mm:ss.SSS');
+
+  const logContent = util.formatWithOptions(
+    { colors: true },
+    logTemplate,
+    now,
+    ip,
+    method,
+    originalUrl,
+    JSON.stringify({
+      method,
+      url: originalUrl,
+      userAgent: headers['user-agent'],
+      body: _maskFields(body, 'password'),
+      params,
+      query,
+    })
+  );
+
+  // Using access_req logger object have been defined before.
+  logger.access_req.info(logContent);
+};
+
+// Ouptput success response log
+export const responseLogger = (input: {
+  requestId: number;
+  response: Response;
+  data: any;
+}) => {
+  const { requestId, response, data } = input;
+
+  const log: ResponseLog = {
+    requestId,
+    statusCode: response.statusCode,
+    data,
+  };
+
+  // Using access_res logger object have been defined before.
+  logger.access_res.info(JSON.stringify(log));
+};
+
+// Ouptput error response log
+export const responseErrorLogger = (input: {
+  requestId: number;
+  exception: HttpException | Error;
+}) => {
+  const { requestId, exception } = input;
+
+  const log: ResponseLog = {
+    requestId,
+    statusCode:
+      exception instanceof HttpException ? exception.getStatus() : null,
+    message: exception?.stack || exception?.message,
+  };
+
+  // Using access_res logger object have been defined before.
+  logger.access_res.info(JSON.stringify(log));
+  logger.access_res.error(exception);
+};
+```
+
+you can read [here](https://github.com/tuananhhedspibk/restful-app/blob/main/libs/middleware/logger/index.ts) for more details
+
+After defining `LoggerInterceptor`, I'll apply this interceptor to my application like this:
+
+```ts
+const app = await NestFactory.create(AppModule);
+
+app.useGlobalInterceptors(new LoggerInterceptor());
+```
+
+I think it's not so hard to apply my own custom Interceptor to NestJS app because it's the built-in feature of NestJS, you can read more [here](https://github.com/tuananhhedspibk/restful-app/blob/main/src/main.ts)
+
+With `fatal` and `debug` logs, I'll use those in use-case layer or infrastructure layer for the following purposes:
+
+- Notify the "fatal" errors like can not connect to DB.
+- Debugging when user has some problems.
+
+By just doing this:
+
+```ts
+logger.fatal.error('Error message');
+```
+
+I can output the fatal log maybe to the console or some notify channel like Slack, ...
+
+You can read more examples in [here](https://github.com/tuananhhedspibk/restful-app/blob/main/src/users/application/command/signup/handler.ts#L35)
+
+And this is the results:
+
+First is for `access request log` and `response log` (when error does not occur).
+
+![Screenshot 2024-05-16 at 23 05 12](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/80eba6d1-bc8b-4dc0-ac90-ccb04da67840)
