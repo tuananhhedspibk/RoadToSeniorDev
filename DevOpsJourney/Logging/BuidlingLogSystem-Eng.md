@@ -339,3 +339,27 @@ And this is the results:
 First is for `access request log` and `response log` (when error does not occur).
 
 ![Screenshot 2024-05-16 at 23 05 12](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/80eba6d1-bc8b-4dc0-ac90-ccb04da67840)
+
+You can see that, the information related to requests like `methd`, `body`, ... is displayed clearly.
+
+In case of error:
+
+![Screenshot 2024-05-16 at 23 05 26](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/20c65d40-8941-495d-ae53-5bf92959ee0e)
+
+The `error type` and `error message` are displayed too.
+
+Our `fatal log` will be looked like:
+
+![Screenshot 2024-05-16 at 23 09 21](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/4e9a06ca-8c65-4f2a-970c-571981e78bf4)
+
+The `error message` and `error type` are outputted too.
+
+## Conclusion
+
+In this article, I have shared how to design and implement a basic logging system.
+
+The illustration example is simple. I hope you can understand the importance and need for building a logging system that can be helpful when operating and debugging a system.
+
+Thank you for reading; see you in the following article.
+
+Happy coding.
