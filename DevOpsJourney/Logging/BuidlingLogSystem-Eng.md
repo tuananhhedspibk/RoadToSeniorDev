@@ -28,8 +28,6 @@ Below is the list of the questions we should ask ourselves before implementing a
 
 ## Log Level
 
-Sau khi đã hiểu rõ được mục đích của mình khi đưa ra log, chúng ta cần "phân cấp" log.
-
 After understanding the purpose of loggin we should hierarchy the log
 
 | Log level | Concept                                                                                                                    | How to handle                               | Example                                    |
