@@ -62,7 +62,7 @@ In this section, I'll answer the following six questions for each log type.
   - `WARN / INFO`: Output inside the system or log managing tool.
   - `DEBUG / TRACE`: Output at `console.log` inside `staging (pre-product) environment`.
 - What:
-  - `FATAL / ERROR`: Stacktrace.
+  - `FATAL / ERROR`: Stack-trace.
   - `WARN / INFO / DEBUG/ TRACE`: The content we want to notify.
 - How:
   - `FATAL / ERROR`: Output through log managing tools or to Slack, SMS, ... (in `push-type`).
@@ -70,7 +70,7 @@ In this section, I'll answer the following six questions for each log type.
 
 ### Access log
 
-- Why: Ouptut the log to follow the sending and receiving request process.
+- Why: Output the log to follow the sending and receiving request process.
 - Who: System itself or from infrastructure.
 - When: Output at sending or receiving request time.
 - Where: In `level INFO` and `pull-type.` Because the amount of logs may be large, we have to pay attention to finding log speed.
@@ -101,7 +101,7 @@ That's all about the concepts; let's look at a sample project.
 
 You can see here for more details about the code: <https://github.com/tuananhhedspibk/NewAnigram-BE-DDD>
 
-### Selecting loggin library
+### Selecting logging library
 
 I'll use `log4js` library (<https://github.com/log4js-node/log4js-node>), the reason is simple because `log4js` constructs their logging level in the same way with my thinking.
 
@@ -372,7 +372,7 @@ First is for `access request log` and `response log` (when error does not occur)
 
 ![Screenshot 2024-09-14 at 12 59 06](https://github.com/user-attachments/assets/0c307744-e8da-4d8d-95c6-4d1bdf0c38bc)
 
-You can see that, the information related to requests like `methd`, `body`, ... is displayed clearly.
+You can see that, the information related to requests like `method`, `body`, ... is displayed clearly.
 
 In case of error:
 
