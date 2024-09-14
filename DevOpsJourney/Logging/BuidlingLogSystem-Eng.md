@@ -241,6 +241,40 @@ I defined three methods:
 like this:
 
 ```ts
+const MaskField = {
+  Email: 'email',
+  Password: 'password',
+} as const;
+
+type MaskField = (typeof MaskField)[keyof typeof MaskField];
+
+const _maskFields = (object: FixType, fields: MaskField[]): FixType => {
+  const maskOptions = {
+    maskWith: '*',
+    unmaskedStartCharacters: 0,
+    unmaskedEndCharacters: 0,
+  };
+
+  for (let i = 0; i < fields.length; i++) {
+    switch (fields[i]) {
+      case MaskField.Email: {
+        object[MaskField.Email] = maskData.maskEmail2(
+          object[MaskField.Email],
+          maskOptions
+        );
+      }
+      case MaskField.Password: {
+        object[MaskField.Password] = maskData.maskPassword(
+          object[MaskField.Password],
+          maskOptions
+        );
+      }
+    }
+  }
+
+  return object;
+};
+
 export const requestLogger = (request: Request) => {
   const { ip, originalUrl, method, params, query, body, headers } = request;
 
@@ -259,7 +293,7 @@ export const requestLogger = (request: Request) => {
       method,
       url: originalUrl,
       userAgent: headers['user-agent'],
-      body: _maskFields(body, 'password'),
+      body: _maskFields(body, [MaskField.Email, MaskField.Password]),
       params,
       query,
     })
@@ -338,7 +372,7 @@ And this is the results:
 
 First is for `access request log` and `response log` (when error does not occur).
 
-![Screenshot 2024-05-16 at 23 05 12](https://github.com/tuananhhedspibk/tuananhhedspibk.github.io/assets/15076665/80eba6d1-bc8b-4dc0-ac90-ccb04da67840)
+![Screenshot 2024-09-14 at 12 59 06](https://github.com/user-attachments/assets/0c307744-e8da-4d8d-95c6-4d1bdf0c38bc)
 
 You can see that, the information related to requests like `methd`, `body`, ... is displayed clearly.
 
